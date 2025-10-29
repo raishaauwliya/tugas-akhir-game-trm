@@ -12,7 +12,19 @@ define warga3 = Character('Warga 3', color="#0A0A0A")
 define left_position  = Position(xalign=0.05, yalign=0.8)
 define right_position = Position(xalign=0.95, yalign=0.8)
 
+label choose_language:
+    menu:
+        "Pilih Bahasa / Choose Language":
+            pass
+        "Bahasa Indonesia":
+            $ renpy.change_language(None)      # bahasa sumber (ID)
+        "English":
+            $ renpy.change_language("english")  # aktifkan terjemahan EN
+    return
+
 label start:
+    call choose_language
+    play audio "audio/sound.mp3" fadein 1.0
 
     scene bg a
 
@@ -107,7 +119,7 @@ label scene_longsor:
     with dissolve
 
     show bu sari info at left_position
-    bu_sari "Iya, betul sekali! Tanah longsor adalah pergerakan massa tanah atau batuan di lereng bukit atau gunung. Ini bisa berbahaya, apalagi di tempat yang banyak rumah. Salah satu penyebabnya adalah curah hujan yang tinggi. Kalau hujan deras, tanah bisa jadi jenuh air, berat, dan licin, sehingga mudah bergerak ke bawah."
+    bu_sari "Iya, betul sekali! Tanah longsor adalah pergerakan massa tanah atau batuan di lereng bukit atau gunung. Ini bisa berbahaya, apalagi di tempat yang banyak rumah. Salah satu penyebabnya adalah curah hujan yang tinggi."
 
     # Ganti ke Niko
     hide bu sari
