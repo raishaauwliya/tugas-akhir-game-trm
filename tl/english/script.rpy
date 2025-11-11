@@ -17,14 +17,6 @@ translate english strings:
     old "Warga 3"
     new "Villager 3"
 
-    # ==== Language chooser ====
-    old "Pilih Bahasa / Choose Language"
-    new "Choose Language"
-    old "Bahasa Indonesia"
-    new "Indonesian"
-    old "English"
-    new "English"
-
     # ==== Start scene lines ====
     old "Suasana ruang klub terasa hangat dan penuh semangat."
     new "The club room feels warm and full of enthusiasm."

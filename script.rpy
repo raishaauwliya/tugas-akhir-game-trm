@@ -13,14 +13,39 @@ define left_position  = Position(xalign=0.05, yalign=0.8)
 define right_position = Position(xalign=0.95, yalign=0.8)
 
 label choose_language:
-    menu:
-        "Pilih Bahasa / Choose Language":
-            pass
-        "Bahasa Indonesia":
-            $ renpy.change_language(None)      # bahasa sumber (ID)
-        "English":
-            $ renpy.change_language("english")  # aktifkan terjemahan EN
+    # Panggil screen khusus bahasa
+    call screen choose_language_screen
     return
+
+
+screen choose_language_screen():
+
+    tag menu              # supaya menggantikan menu lain
+    modal True            # player harus pilih dulu
+
+    style_prefix "choice" # pakai style tombol menu biasa (biru)
+
+    vbox:
+        xalign 0.5
+        yalign 0.1
+        spacing 10
+        # === JUDUL (TIDAK BISA DIKLIK, TANPA BAR BIRU) ===
+        text "Pilih Bahasa / Choose Language":
+            size 40
+            color "#FFFFFF"
+            xalign 0.5
+
+        # === PILIHAN BAHASA (TOMBOL BIRU) ===
+        vbox:
+            spacing 15
+            xalign 0.5
+
+            textbutton "Bahasa Indonesia":
+                action [ Function(renpy.change_language, None), Return() ]
+
+            textbutton "English":
+                action [ Function(renpy.change_language, "english"), Return() ]
+
 
 label start:
     call choose_language
