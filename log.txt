@@ -1,0 +1,45 @@
+2025-11-16 04:14:13 UTC
+Windows-10-10.0.26100
+Ren'Py 8.3.4.24120703
+
+Early init took 0.14s
+Loading error handling took 0.12s
+Loading script took 2.79s
+Loading save slot metadata took 0.10s
+Loading persistent took 0.00s
+ - Init at game/gui.rpy:11 took 0.27666 s.
+Running init code took 0.65s
+Loading analysis data took 0.02s
+Analyze and compile ATL took 0.00s
+Reloading save slot metadata took 0.33s
+Index archives took 0.00s
+Dump and make backups took 0.09s
+Cleaning cache took 0.00s
+Making clean stores took 0.00s
+Initial gc took 0.04s
+DPI scale factor: 2.000000
+nvdrs: Loaded, about to disable thread optimizations.
+nvdrs: b"Couldn't load nvlib." (can be ignored)
+Creating interface object took 0.10s
+Cleaning stores took 0.00s
+Init translation took 0.04s
+Build styles took 0.00s
+Load screen analysis took 0.03s
+Analyze screens took 0.00s
+Save screen analysis took 0.00s
+Prepare screens took 0.07s
+Save pyanalysis. took 0.00s
+Save bytecode. took 0.00s
+Running _start took 0.00s
+Interface start took 0.52s
+
+Initializing gl2 renderer:
+primary display bounds: (0, 0, 2880, 1800)
+swap interval: 1 frames
+Windowed mode.
+Vendor: "b'Intel'"
+Renderer: b'Intel(R) Arc(TM) Graphics'
+Version: b'4.6.0 - Build 32.0.101.6874'
+Display Info: None
+Screen sizes: virtual=(1536, 1024) physical=(2376, 1584) drawable=(2376, 1584)
+Maximum texture size: 4096x4096

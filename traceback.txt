@@ -1,0 +1,30 @@
+﻿I'm sorry, but an uncaught exception occurred.
+
+While running game code:
+  File "game/script.rpy", line 283, in script
+    $ idx = voice_menu_choice(
+  File "game/script.rpy", line 283, in <module>
+    $ idx = voice_menu_choice(
+  File "game/script.rpy", line 143, in voice_menu_choice
+    renpy.notify("kamu mengatakan ", spoken_tokens.join(", "))
+AttributeError: 'RevertableList' object has no attribute 'join'
+
+-- Full Traceback ------------------------------------------------------------
+
+Full traceback:
+  File "game/script.rpy", line 283, in script
+    $ idx = voice_menu_choice(
+  File "C:\DevTools\renpy-8.3.4-sdk\renpy\ast.py", line 827, in execute
+    renpy.python.py_exec_bytecode(self.code.bytecode, self.hide, store=self.store)
+  File "C:\DevTools\renpy-8.3.4-sdk\renpy\python.py", line 1178, in py_exec_bytecode
+    exec(bytecode, globals, locals)
+  File "game/script.rpy", line 283, in <module>
+    $ idx = voice_menu_choice(
+  File "game/script.rpy", line 143, in voice_menu_choice
+    renpy.notify("kamu mengatakan ", spoken_tokens.join(", "))
+AttributeError: 'RevertableList' object has no attribute 'join'
+
+Windows-10-10.0.26100 AMD64
+Ren'Py 8.3.4.24120703
+SEBELUM TERLAMBAT 1.0
+Sat Nov 15 11:19:25 2025
