@@ -3,6 +3,25 @@
 init python:
     import os, json, subprocess, string, math, re
     from collections import Counter
+    
+    # ====================================================================
+    # 1) Fungsi On/Off Audio
+    # ====================================================================
+    
+    def play_dialogue(audio_file):
+        """
+        Plays audio only if the 'voice' volume is turned on.
+        """
+        # 1. Check the condition (Is Voice Volume > 0?)
+        # We check "voice" because that is what your button in audio_toggle.py controls.
+        current_vol = _preferences.volumes.get("voice", 1.0)
+        
+        if current_vol > 0.0:
+            # 2. If Yes, Play the sound
+            renpy.sound.play(audio_file)
+        else:
+            # 3. If No, do nothing (Sound is not starting)
+            pass
 
     # -----------------------------
     # 1) Fungsi Speech-to-Text (STT)
@@ -30,7 +49,11 @@ init python:
         script_path = os.path.join(config.basedir, "stt_worker.py")
 
         # >>> GANTI path ini jadi python.exe yang bener punyamu <<<
-        python_exe = r"C:\Users\raish\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe"
+        manual_python_exe = False
+        if manual_python_exe:
+            python_exe = r"C:\Users\m3g3n\AppData\Local\Programs\Python\Python312\python.exe"  # Ganti sesuai path Python-mu
+        else:
+            python_exe = r"C:\Users\raish\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe"
 
         if not os.path.isfile(script_path):
             renpy.notify("stt_worker.py tidak ditemukan.")
@@ -319,21 +342,21 @@ label start:
 
     "Suasana ruang klub terasa hangat dan penuh semangat."
     show adrian senyum at left_position
-    play sound "audio/ID/Adrian 1.mp3"
+    $ play_dialogue("audio/ID/Adrian 1.mp3")
     adrian "Halo teman-teman! Selamat datang di Klub Sahabat Alam. Di sini, kita akan belajar bagaimana cara menjaga alam dan juga cara menghadapi bencana alam supaya kita tetap aman."
     hide adrian
     with dissolve
     stop sound fadeout 1.0
 
     show siti senyum at right_position
-    play sound "audio/ID/Siti 1.mp3"
+    $ play_dialogue("audio/ID/Siti 1.mp3")
     siti "Iya, betul banget, Adrian. Di Indonesia, kita punya banyak sekali keindahan alam, tapi juga ada bencana yang kadang terjadi, seperti longsor dan banjir. Jadi, penting banget kita tahu cara menghadapinya."
     hide siti
     with dissolve
     stop sound fadeout 1.0
 
     show pak karto senyum at left_position
-    play sound "audio/ID/Pak Karto 1.mp3"
+    $ play_dialogue("audio/ID/Pak Karto 1.mp3")
     pak_karto "Wah, saya senang melihat semangat dan antusias kalian! Nah, kalian mau mulai belajar dari yang mana dulu? Longsor atau banjir?"
     hide pak karto 
     with dissolve
@@ -345,7 +368,7 @@ label start:
 # PILIHAN BENCANA (LONGOSOR / BANJIR)
 # ====================================================================
 
-label pilih_bencana:    
+label pilih_bencana:  
     show pak karto senyum at left_position
     $ renpy.notify("Silakan ucapkan pilihanmu. Kamu bisa mengatakan:")
     $ renpy.pause(1.0)
@@ -386,7 +409,7 @@ label stt_bencana:
         show pak karto senyum at left_position
         pak_karto "Maaf, saya tidak menangkap pilihanmu. Mari kita coba lagi."
 
-        jump pilih_bencana   # ulangi dari awal label
+        jump pilih_bencana # ulangi dari awal label
 
 # ====================================================================
 # ALUR CERITA: LONGSOR
@@ -395,19 +418,19 @@ label stt_bencana:
 label scene_longsor:
 
     scene bg b
-    play sound "audio/ID/Narasi 1.mp3"
+    $ play_dialogue("audio/ID/Narasi 1.mp3")
     show text Text(
         "Pada liburan sekolah yang cerah, Rara gadis kecil usia 11 tahun tiba di Desa Lereng Damai bersama keluarganya. Desa ini berada di kaki gunung yang megah, dikelilingi pepohonan hijau dan udara yang sejuk. Rara bersemangat memulai petualangan di tempat liburannya, tapi ia juga merasa sedikit cemas.",
         size=36,
         color="#179940",
-        slow=True,          
-        slow_cps=13,        
-        xalign=0.5,         
-        yalign=-0.1,         
-        text_align=0.5,     
-        justify=True,       
-        xmaximum=900,       
-        line_spacing=10,    
+        slow=True,     
+        slow_cps=13,    
+        xalign=0.5,     
+        yalign=-0.1,     
+        text_align=0.5,   
+        justify=True,    
+        xmaximum=900,    
+        line_spacing=10,  
         layout="subtitle"
     )
 
@@ -420,7 +443,7 @@ label scene_longsor:
 
 
     show rara senang at right_position
-    play sound "audio/ID/Rara 1.mp3"
+    $ play_dialogue("audio/ID/Rara 1.mp3")
     rara "Wow, desa ini indah sekali, Niko! Tapi kenapa bukitnya terlihat curam ya?"
     hide rara
     with dissolve
@@ -428,21 +451,21 @@ label scene_longsor:
 
 
     show niko info at left_position
-    play sound "audio/ID/Niko 1.mp3"
+    $ play_dialogue("audio/ID/Niko 1.mp3")
     niko "Iya Rara, bukit ini memang curam. Kita harus hati-hati saat hujan!"
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show rara mikir at right_position
-    play sound "audio/ID/Rara 2.mp3"
+    $ play_dialogue("audio/ID/Rara 2.mp3")
     rara "Emang kenapa jika hujan Niko? apa yang akan terjadi?"
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show niko info2 at left_position
-    play sound "audio/ID/Niko 2.mp3"
+    $ play_dialogue("audio/ID/Niko 2.mp3")
     niko "Kalau hujan deras, tanah bisa longsor! Ayo, aku ajak kamu ke sekolah untuk belajar lebih banyak tentang tanah longsor!"
     hide niko
     with dissolve
@@ -453,7 +476,7 @@ label scene_longsor:
 
     # Bu Sari muncul bicara dulu
     show bu sari senyum at left_position
-    play sound "audio/ID/Bu Sari 3.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 3.mp3")
     bu_sari "Anak-anak, hari ini kita akan belajar tentang tanah longsor. Siapa yang tahu apa itu bencana tanah longsor?"
 
     # Ganti ke Rara
@@ -462,7 +485,7 @@ label scene_longsor:
     stop sound fadeout 1.0
 
     show rara mikir at right_position
-    play sound "audio/ID/Rara 3.mp3"
+    $ play_dialogue("audio/ID/Rara 3.mp3")
     rara "Tanah longsor itu ketika tanah bergerak turun dari bukit, kan, Bu?"
 
     # Kembalikan Bu Sari bicara lagi
@@ -471,7 +494,7 @@ label scene_longsor:
     stop sound fadeout 1.0
 
     show bu sari info at left_position
-    play sound "audio/ID/Bu Sari 1.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 1.mp3")
     bu_sari "Iya, betul sekali! Tanah longsor adalah pergerakan massa tanah atau batuan di lereng bukit atau gunung. Ini bisa berbahaya, apalagi di tempat yang banyak rumah. Salah satu penyebabnya adalah curah hujan yang tinggi."
 
     # Ganti ke Niko
@@ -480,7 +503,7 @@ label scene_longsor:
     stop sound fadeout 1.0
 
     show niko mikir at right_position
-    play sound "audio/ID/Niko 3.mp3"
+    $ play_dialogue("audio/ID/Niko 3.mp3")
     niko "Jadi, kalau hujan terus-menerus, itu bisa menyebabkan longsor ya, Bu?"
 
     # Kembalikan lagi ke Bu Sari
@@ -489,7 +512,7 @@ label scene_longsor:
     stop sound fadeout 1.0
 
     show bu sari info at left_position 
-    play sound "audio/ID/Bu Sari 2.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 2.mp3")
     bu_sari "Tepat sekali, Niko! Selain hujan, lereng yang curam juga membuat longsor lebih mudah terjadi karena gaya pendorongnya lebih besar daripada gaya penahannya."
 
     scene bg e
@@ -497,7 +520,7 @@ label scene_longsor:
     stop sound fadeout 1.0
 
     show pak ardi senyum at left_position
-    play sound "audio/ID/Pak Ardi 1.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 1.mp3")
     pak_ardi "Terima kasih adik-adik sudah datang di Program Menanam Pohon! Menanam pohon itu penting untuk mencegah longsor. Jika kita menjaga lingkungan kita artinya kita juga melindungi desa kita."
 
     hide pak ardi
@@ -505,7 +528,7 @@ label scene_longsor:
     stop sound fadeout 1.0
 
     show rara bingung at right_position
-    play sound "audio/ID/Rara 4.mp3"
+    $ play_dialogue("audio/ID/Rara 4.mp3")
     rara "Kenapa pohon bisa membantu mencegah longsor, Pak?"
 
     hide rara
@@ -513,9 +536,9 @@ label scene_longsor:
     stop sound fadeout 1.0
 
     show pak ardi info at left_position
-    play sound "audio/ID/Pak Ardi 2.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 2.mp3")
     pak_ardi "Pohon bisa mencegah longsor karena akar pohon mengikat tanah agar tidak mudah terbawa air. Saat hujan turun, akar bekerja seperti jaring yang menahan tanah. Tanpa pohon, tanah mudah longsor saat hujan deras."
-    play sound "audio/ID/Pak Ardi 3.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 3.mp3")
     pak_ardi "Selain itu, pohon menyerap air hujan lewat daunnya. Ini mengurangi limpasan air yang bisa menyebabkan erosi. Semakin banyak pohon, semakin aman desa kita."
 
     hide pak ardi
@@ -523,7 +546,7 @@ label scene_longsor:
     stop sound fadeout 1.0
 
     show niko senang at right_position
-    play sound "audio/ID/Niko 4.mp3"
+    $ play_dialogue("audio/ID/Niko 4.mp3")
     niko "Aku tidak sabar lihat pohon-pohon ini tumbuh besar! Desa kita akan jadi lebih hijau dan aman!"
 
     hide niko
@@ -534,7 +557,7 @@ label scene_longsor:
     with dissolve
 
     show niko panik at left_position
-    play sound "audio/ID/Niko 5.mp3"
+    $ play_dialogue("audio/ID/Niko 5.mp3")
     niko "Lihat, Rara! Ada retakan di tanah itu. Itu tanda bahaya!"
 
     hide niko
@@ -542,7 +565,7 @@ label scene_longsor:
     stop sound fadeout 1.0
 
     show rara mikir at left_position
-    play sound "audio/ID/Rara 5.mp3"
+    $ play_dialogue("audio/ID/Rara 5.mp3")
     rara "Apa yang harus kita lakukan, Niko?"
     stop sound fadeout 1.0
 
@@ -591,14 +614,14 @@ label stt_longsor_1:
         show niko info at left_position
         niko "Maaf, saya tidak menangkap pilihanmu. Mari kita coba lagi."
 
-        jump pilih_longsor_1   # ulangi dari awal label
+        jump pilih_longsor_1  # ulangi dari awal label
 
 label scene_2_4_1:
     scene bg g
     with dissolve
 
     show pak ardi panik at left_position
-    play sound "audio/ID/Pak Ardi 4.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 4.mp3")
     pak_ardi "Bagus, kalian cepat melapor! Kita akan pasang tanda peringatan di sini."
 
     hide pak ardi
@@ -606,7 +629,7 @@ label scene_2_4_1:
     stop sound fadeout 1.0
 
     show niko bahagia at left_position
-    play sound "audio/ID/Niko 6.mp3"
+    $ play_dialogue("audio/ID/Niko 6.mp3")
     niko "Lihat, Rara! Laporan kita menyelamatkan warga!"
 
     hide niko
@@ -614,7 +637,7 @@ label scene_2_4_1:
     stop sound fadeout 1.0
 
     show rara senyum at left_position
-    play sound "audio/ID/Rara 6.mp3"
+    $ play_dialogue("audio/ID/Rara 6.mp3")
     rara "Iya! Kita berhasil mencegah kecelakaan!"
 
     hide rara
@@ -627,14 +650,14 @@ label scene_2_4_2:
     with dissolve
 
     show niko sedih at right_position
-    play sound "audio/ID/Niko 7.mp3"
+    $ play_dialogue("audio/ID/Niko 7.mp3")
     niko "Lihat, Rara! Retakannya membesar setelah hujan tadi malam!"
 
     hide niko
     with dissolve
 
     show pak ardi marah at right_position
-    play sound "audio/ID/Pak Ardi 5.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 5.mp3")
     pak_ardi "Kalian sudah tahu sejak kemarin? Kenapa tidak dilapor? Sekarang kita harus perbaikan darurat, itu terlalu membahayakan!"
 
     hide pak ardi
@@ -642,7 +665,7 @@ label scene_2_4_2:
     stop sound fadeout 1.0
 
     show rara kecewa at right_position
-    play sound "audio/ID/Rara 7.mp3"
+    $ play_dialogue("audio/ID/Rara 7.mp3")
     rara "Maaf, Pak… kami tidak tahu ini akan memburuk secepat ini."
 
     hide rara
@@ -657,10 +680,10 @@ label scene_evacuation:
     with dissolve
 
     show bu sari ngajar at left_position
-    play sound "audio/ID/Bu Sari 4.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 4.mp3")
     
     bu_sari "Anak-anak, jalur evakuasi adalah rute menuju tempat aman saat bencana. Titik kumpul kita ada di lapangan sekolah yang aman dari longsor. Penting untuk tahu jalur ini supaya bisa bergerak cepat dan aman."
-    play sound "audio/ID/Bu Sari 5.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 5.mp3")
     bu_sari "Kalau terdengar alarm atau sirine, langkah pertama adalah tetap tenang. Ikuti rambu evakuasi yang ada."
 
     hide bu sari
@@ -668,7 +691,7 @@ label scene_evacuation:
     stop sound fadeout 1.0
 
     show niko mikir at right_position
-    play sound "audio/ID/Niko 8.mp3"
+    $ play_dialogue("audio/ID/Niko 8.mp3")
     niko "Kalau ada teman yang jatuh, bagaimana Bu?"
 
     hide niko
@@ -676,7 +699,7 @@ label scene_evacuation:
     stop sound fadeout 1.0
 
     show bu sari info at left_position
-    play sound "audio/ID/Bu Sari 6.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 6.mp3")
     bu_sari "Bantu temanmu dan pastikan semua mengikuti jalur evakuasi. Keselamatan bersama adalah yang utama!"
 
     hide bu sari
@@ -687,7 +710,7 @@ label scene_evacuation:
     with dissolve
 
     show niko mantau at left_position
-    play sound "audio/ID/Niko 9.mp3"
+    $ play_dialogue("audio/ID/Niko 9.mp3")
     niko "Hujannya deras banget! Kita harus segera ke tempat aman!"
 
     hide niko
@@ -695,7 +718,7 @@ label scene_evacuation:
     stop sound fadeout 1.0
 
     show rara mikir at right_position
-    play sound "audio/ID/Rara 11.mp3"
+    $ play_dialogue("audio/ID/Rara 11.mp3")
     rara "Tapi bagaimana kalau ada longsor?"
 
     hide rara
@@ -703,7 +726,7 @@ label scene_evacuation:
     stop sound fadeout 1.0
 
     show bu sari senyum at left_position
-    play sound "audio/ID/Bu Sari 7.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 7.mp3")
     bu_sari "Tenang saja, kita sudah belajar cara evakuasi. Ayo ikuti jalur yang sudah kita pelajari! Segera ke titik kumpul!"
 
     hide bu sari
@@ -711,7 +734,7 @@ label scene_evacuation:
     stop sound fadeout 1.0
 
     show rara takut at right_position
-    play sound "audio/ID/Rara 8.mp3"
+    $ play_dialogue("audio/ID/Rara 8.mp3")
     rara "Aku takut… jalannya licin…"
 
     hide rara
@@ -720,7 +743,7 @@ label scene_evacuation:
 
     jump pilih_scene_2_4_2
 
-label pilih_scene_2_4_2:    
+label pilih_scene_2_4_2:  
     show niko info at left_position
     $ renpy.notify("Silakan ucapkan pilihanmu. Kamu bisa mengatakan:")
     $ renpy.pause(1.0)
@@ -760,7 +783,7 @@ label stt_scene_2_4_2:
         show niko info at left_position
         niko "Maaf, saya tidak menangkap pilihanmu. Mari kita coba lagi."
 
-        jump pilih_scene_2_4_2   # ulangi dari awal label
+        jump pilih_scene_2_4_2  # ulangi dari awal label
         
 label scene_2_6_1:
 
@@ -768,7 +791,7 @@ label scene_2_6_1:
     with dissolve
 
     show niko info2 at left_position
-    play sound "audio/ID/Niko 10.mp3"
+    $ play_dialogue("audio/ID/Niko 10.mp3")
     niko "Pelankan langkah! Jangan sampai terjatuh!"
 
     hide niko
@@ -776,7 +799,7 @@ label scene_2_6_1:
     stop sound fadeout 1.0
 
     show rara senyum at right_position
-    play sound "audio/ID/Rara 9.mp3"
+    $ play_dialogue("audio/ID/Rara 9.mp3")
     rara "Benar… lebih baik hati-hati daripada jatuh."
 
     hide rara
@@ -784,7 +807,7 @@ label scene_2_6_1:
     stop sound fadeout 1.0
 
     show bu sari senyum at left_position
-    play sound "audio/ID/Bu Sari 8.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 8.mp3")
     bu_sari "Bagus! Kalian semua selamat karena tidak panik."
 
     hide bu sari
@@ -799,7 +822,7 @@ label scene_2_6_2:
     with dissolve
 
     show rara sedih at right_position
-    play sound "audio/ID/Rara 10.mp3"
+    $ play_dialogue("audio/ID/Rara 10.mp3")
     rara "Aduh! Kakiku terkilir!"
 
     hide rara
@@ -807,7 +830,7 @@ label scene_2_6_2:
     stop sound fadeout 1.0
 
     show niko mantau at left_position
-    play sound "audio/ID/Niko 11.mp3"
+    $ play_dialogue("audio/ID/Niko 11.mp3")
     niko "Sudah kubilang jangan lari! Yuk aku bantu ke pos kesehatan!"
 
     hide niko
@@ -815,7 +838,7 @@ label scene_2_6_2:
     stop sound fadeout 1.0
 
     show bu sari marah at left_position
-    play sound "audio/ID/Bu Sari 9.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 9.mp3")
     bu_sari "Ini risiko kalau tidak ikuti prosedur evakuasi."
 
     hide bu sari
@@ -830,61 +853,61 @@ label scene_refleksi_longsor:
     with dissolve
 
     show pak ardi nyimak at left_position
-    play sound "audio/ID/Pak Ardi 6.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 6.mp3")
     pak_ardi "Terima kasih kepada semua yang hadir. Kita harus belajar dari pengalaman ini dan meningkatkan kesadaran tentang bahaya tanah longsor."
     hide pak ardi
     with dissolve
     stop sound fadeout 1.0
 
     show niko info2 at right_position
-    play sound "audio/ID/Niko 12.mp3"
+    $ play_dialogue("audio/ID/Niko 12.mp3")
     niko "Kita harus terus menjaga lingkungan agar tidak ada lagi longsor! Menanam pohon dan menjaga kebersihan saluran air itu penting."
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show warga1 at left_position
-    play sound "audio/ID/Warga 1.mp3"
+    $ play_dialogue("audio/ID/Warga 1.mp3")
     warga1 "Bagaimana kalau kita mengadakan pelatihan evakuasi setiap bulan? Agar semua orang tahu apa yang harus dilakukan saat terjadi bencana."
     hide warga1
     with dissolve
     stop sound fadeout 1.0
 
     show warga2 at right_position
-    play sound "audio/ID/Warga 2.mp3"
+    $ play_dialogue("audio/ID/Warga 2.mp3")
     warga2 "Dan kita bisa membentuk kelompok relawan untuk membantu saat terjadi bencana!"
     hide warga2
     with dissolve
     stop sound fadeout 1.0
 
     show rara senang at right_position
-    play sound "audio/ID/Rara 12.mp3"
+    $ play_dialogue("audio/ID/Rara 12.mp3")
     rara "Kita semua bisa menjadi pahlawan bagi desa ini! Dengan pengetahuan dan kerja sama, kita bisa melindungi diri dan tetangga kita."
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show pak ardi senyum at left_position
-    play sound "audio/ID/Pak Ardi 7.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 7.mp3")
     pak_ardi "Betul sekali, Rara! Kesadaran masyarakat sangat penting dalam mitigasi bencana. Kita perlu memahami tiga aspek utama: pengetahuan, sikap, dan perilaku."
     hide pak ardi
     with dissolve
     stop sound fadeout 1.0
 
     scene bg b
-    play sound "audio/ID/Narasi 2.mp3"
+    $ play_dialogue("audio/ID/Narasi 2.mp3")
     show text Text(
         "Setelah melalui berbagai pengalaman dan pembelajaran tentang tanah longsor, Rara, Niko dan warga sekitar di Desa Lereng Damai menyadari betapa pentingnya kesadaran akan bencana ini. Mereka belajar bahwa tanah longsor adalah pergerakan massa tanah yang dapat terjadi akibat curah hujan tinggi, gempa bumi, atau kondisi lereng yang tidak stabil. Melalui simulasi evakuasi dan kegiatan menanam pohon, mereka memahami bahwa tindakan pencegahan seperti menjaga lingkungan dan mengikuti prosedur evakuasi sangatlah penting untuk keselamatan diri dan orang lain.",
         size=36,
         color="#179940",
-        slow=True,          
-        slow_cps=13,        
-        xalign=0.5,         
-        yalign=-0.05,         
-        text_align=0.5,     
-        justify=True,       
-        xmaximum=900,       
-        line_spacing=10,    
+        slow=True,     
+        slow_cps=13,    
+        xalign=0.5,     
+        yalign=-0.05,     
+        text_align=0.5,   
+        justify=True,    
+        xmaximum=900,    
+        line_spacing=10,  
         layout="subtitle"
     )
 
@@ -901,19 +924,19 @@ label scene_refleksi_longsor:
 label scene_banjir:
 
     scene bg b
-    play sound "audio/ID/Narasi 3.mp3"
+    $ play_dialogue("audio/ID/Narasi 3.mp3")
     show text Text(
         "Pada suatu hari yang cerah di bulan November, Rara, seorang gadis kecil berusia 11 tahun, tiba di Desa Lereng Damai bersama keluarganya. Desa ini dikelilingi oleh sungai yang mengalir tenang dan sawah hijau yang luas. Rara sangat bersemangat memulai petualangan di tempat liburannya. Namun, ia mendengar dari warga bahwa desa ini sering terkena banjir saat musim hujan tiba.",
         size=36,
         color="#179940",
-        slow=True,          
-        slow_cps=13,        
-        xalign=0.5,         
-        yalign=-0.1,         
-        text_align=0.5,     
-        justify=True,       
-        xmaximum=900,       
-        line_spacing=10,    
+        slow=True,     
+        slow_cps=13,    
+        xalign=0.5,     
+        yalign=-0.1,     
+        text_align=0.5,   
+        justify=True,    
+        xmaximum=900,    
+        line_spacing=10,  
         layout="subtitle"
     )
 
@@ -926,28 +949,28 @@ label scene_banjir:
     with dissolve
 
     show rara senang at right_position
-    play sound "audio/ID/Rara 13.mp3"
+    $ play_dialogue("audio/ID/Rara 13.mp3")
     rara "Wow, desa ini indah sekali! Tapi kenapa sungainya terlihat begitu besar?"
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show niko info at left_position
-    play sound "audio/ID/Niko 13.mp3"
+    $ play_dialogue("audio/ID/Niko 13.mp3")
     niko "Sungai ini memang besar, Rara. Saat hujan deras, airnya sering meluap dan membanjiri desa."
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show rara mikir at right_position
-    play sound "audio/ID/Rara 14.mp3"
+    $ play_dialogue("audio/ID/Rara 14.mp3")
     rara "Banjir? Apa itu berbahaya?"
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show niko info2 at left_position
-    play sound "audio/ID/Niko 14.mp3"
+    $ play_dialogue("audio/ID/Niko 14.mp3")
     niko "Iya! Kalau tidak hati-hati, banjir bisa merusak rumah dan sawah kita. Ayo aku ajak kamu ke sekolah untuk belajar lebih banyak tentang banjir!"
     hide niko
     with dissolve
@@ -961,37 +984,37 @@ label scene_3_2:
     with dissolve
 
     show bu sari ngajar at left_position
-    play sound "audio/ID/Bu Sari 10.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 10.mp3")
     bu_sari "Anak-anak, hari ini kita akan belajar tentang banjir. Siapa yang tahu apa itu banjir?"
     hide bu sari
     with dissolve
     stop sound fadeout 1.0
 
     show niko mikir at right_position
-    play sound "audio/ID/Niko 15.mp3"
+    $ play_dialogue("audio/ID/Niko 15.mp3")
     niko "Banjir itu saat air meluap dan menggenangi jalan atau rumah, kan Bu?"
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show bu sari info at left_position
-    play sound "audio/ID/Bu Sari 11.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 11.mp3")
     bu_sari "Betul sekali Niko! Banjir terjadi ketika air meluap dari sungai atau hujan turun sangat deras sehingga tanah tidak bisa menyerapnya."
-    play sound "audio/ID/Bu Sari 12.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 12.mp3")
     bu_sari "Penyebab banjir ada beberapa: pertama, curah hujan yang tinggi; kedua, saluran air tersumbat sampah; ketiga, hutan di hulu sungai ditebang."
     hide bu sari
     with dissolve
     stop sound fadeout 1.0
 
     show rara mikir at right_position
-    play sound "audio/ID/Rara 15.mp3"
+    $ play_dialogue("audio/ID/Rara 15.mp3")
     rara "Jadi kalau kita buang sampah sembarangan, itu bisa menyebabkan banjir ya, Bu?"
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show bu sari senyum at left_position
-    play sound "audio/ID/Bu Sari 13.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 13.mp3")
     bu_sari "Betul sekali! Sampah yang menyumbat saluran air membuat air tidak bisa mengalir lancar."
     hide bu sari
     with dissolve
@@ -1007,28 +1030,28 @@ label scene_3_3:
     with dissolve
 
     show pak ardi senyum at left_position
-    play sound "audio/ID/Pak Ardi 8.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 8.mp3")
     pak_ardi "Terima kasih sudah datang! Menanam pohon sangat penting untuk mencegah banjir. Pohon membantu menyerap air hujan dan mencegah erosi tanah."
     hide pak ardi
     with dissolve
     stop sound fadeout 1.0
 
     show rara senyum at right_position
-    play sound "audio/ID/Rara 16.mp3"
+    $ play_dialogue("audio/ID/Rara 16.mp3")
     rara "Kenapa pohon bisa membantu mencegah banjir, Pak?"
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show pak ardi info at left_position
-    play sound "audio/ID/Pak Ardi 9.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 9.mp3")
     pak_ardi "Akar pohon menyerap air hujan sehingga tanah tidak cepat jenuh air. Pohon juga memperlambat aliran air ke sungai, jadi sungai tidak langsung meluap."
     hide pak ardi
     with dissolve
     stop sound fadeout 1.0
 
     show niko senang at right_position
-    play sound "audio/ID/Niko 16.mp3"
+    $ play_dialogue("audio/ID/Niko 16.mp3")
     niko "Ayo kita tanam bersama! Semakin banyak pohon kita tanam, semakin aman desa kita dari banjir!"
     hide niko
     with dissolve
@@ -1045,21 +1068,21 @@ label scene_3_4:
     with dissolve
 
     show niko panik at left_position
-    play sound "audio/ID/Niko 17.mp3"
+    $ play_dialogue("audio/ID/Niko 17.mp3")
     niko "Lihat Rara! Air sungainya mulai naik dan warnanya keruh. Ini tanda bahaya!"
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show rara bingung at right_position
-    play sound "audio/ID/Rara 17.mp3"
+    $ play_dialogue("audio/ID/Rara 17.mp3")
     rara "Iya, Lalu apa yang harus kita lakukan Niko?"
     hide rara
     with dissolve
     stop sound fadeout 1.0
     jump pilih_scene_3_4
 
-label pilih_scene_3_4:    
+label pilih_scene_3_4:  
     show rara bingung at left_position
     $ renpy.notify("Silakan ucapkan pilihanmu. Kamu bisa mengatakan:")
     $ renpy.pause(1.0)
@@ -1099,7 +1122,7 @@ label stt_scene_3_4:
         show rara bingung at left_position
         rara "Maaf, saya tidak menangkap pilihanmu. Mari kita coba lagi."
 
-        jump pilih_scene_3_4   # ulangi dari awal label
+        jump pilih_scene_3_4  # ulangi dari awal label
 
 # [3.4.1] Lapor Cepat
 label scene_3_4_1:
@@ -1109,14 +1132,14 @@ label scene_3_4_1:
     with dissolve
 
     show pak ardi panik at left_position
-    play sound "audio/ID/Pak Ardi 11.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 11.mp3")
     pak_ardi "Perhatian semua warga! Air sungai mulai naik. Segera siapkan barang-barang penting dan bersiap untuk evakuasi ke tempat aman!"
     hide pak ardi
     with dissolve
     stop sound fadeout 1.0
 
     show niko senang at left_position
-    play sound "audio/ID/Niko 18.mp3"
+    $ play_dialogue("audio/ID/Niko 18.mp3")
     niko "Bagus sekali, Rara! Kita berhasil memberi tahu orang-orang tepat waktu!"
     hide niko
     with dissolve
@@ -1133,14 +1156,14 @@ label scene_3_4_2:
     with dissolve
 
     show rara sedih at right_position
-    play sound "audio/ID/Rara 18.mp3"
+    $ play_dialogue("audio/ID/Rara 18.mp3")
     rara "Oh tidak! Airnya sudah sampai ke jalan!"
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show niko sedih at left_position
-    play sound "audio/ID/Niko 19.mp3"
+    $ play_dialogue("audio/ID/Niko 19.mp3")
     niko "Kita seharusnya melapor lebih awal! Sekarang banyak orang yang kesulitan!"
     hide niko
     with dissolve
@@ -1157,37 +1180,37 @@ label scene_3_5:
     with dissolve
 
     show bu sari ngajar at left_position
-    play sound "audio/ID/Bu Sari 15.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 15.mp3")
     bu_sari "Anak-anak, hari ini kita akan simulasi evakuasi banjir. Jalur evakuasi penting untuk membawa kita ke tempat aman."
-    play sound "audio/ID/Bu Sari 16.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 16.mp3")
     bu_sari "Kalau ada peringatan banjir, segera ambil barang-barang penting seperti dokumen, obat, dan makanan ringan."
     hide bu sari
     with dissolve
     stop sound fadeout 1.0
 
     show rara mikir at right_position
-    play sound "audio/ID/Rara 19.mp3"
+    $ play_dialogue("audio/ID/Rara 19.mp3")
     rara "Kalau air sudah masuk ke rumah, Bu?"
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show bu sari info at left_position
-    play sound "audio/ID/Bu Sari 17.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 17.mp3")
     bu_sari "Segera keluar dan cari tempat lebih tinggi. Jangan tunggu air makin tinggi. Jangan bawa barang berat yang menghambat gerak."
     hide bu sari
     with dissolve
     stop sound fadeout 1.0
 
     show niko senang at right_position
-    play sound "audio/ID/Niko 20.mp3"
+    $ play_dialogue("audio/ID/Niko 20.mp3")
     niko "Dan jangan lupa membantu keluarga atau teman yang kesulitan!"
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show bu sari senyum at left_position
-    play sound "audio/ID/Bu Sari 18.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 18.mp3")
     bu_sari "Tepat sekali! Kalau di sekolah, ikuti petunjuk guru atau petugas keamanan. Yang penting jangan panik, saling membantu, dan tetap tertib."
     hide bu sari
     with dissolve
@@ -1204,21 +1227,21 @@ label scene_3_6:
     with dissolve
 
     show pak ardi senyum at left_position
-    play sound "audio/ID/Pak Ardi 15.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 15.mp3")
     pak_ardi "Warga Desa Lereng Damai! Air sungai meluap, banjir akan segera datang! Kita harus siap-siap evakuasi!"
     hide pak ardi
     with dissolve
     stop sound fadeout 1.0
 
     show rara bingung at right_position
-    play sound "audio/ID/Rara 20.mp3"
+    $ play_dialogue("audio/ID/Rara 20.mp3")
     rara "Airnya sudah sampai ke halaman rumah! Apa yang harus kita lakukan?"
     hide rara
     with dissolve
     stop sound fadeout 1.0
     jump pilih_scene_3_6
 
-label pilih_scene_3_6:    
+label pilih_scene_3_6:  
     show niko info at left_position
     $ renpy.notify("Silakan ucapkan pilihanmu. Kamu bisa mengatakan:")
     $ renpy.pause(1.0)
@@ -1258,7 +1281,7 @@ label stt_scene_3_6:
         show niko info at left_position
         niko "Maaf, saya tidak menangkap pilihanmu. Mari kita coba lagi."
 
-        jump pilih_scene_3_6   # ulangi dari awal label
+        jump pilih_scene_3_6  # ulangi dari awal label
 
 
 # [3.6.1] Bertindak Cepat
@@ -1269,21 +1292,21 @@ label scene_3_6_1:
     with dissolve
 
     show rara senyum at right_position
-    play sound "audio/ID/Rara 21.mp3"
+    $ play_dialogue("audio/ID/Rara 21.mp3")
     rara "Aku senang kita langsung bergerak! Sekarang aku tahu apa yang harus dilakukan saat banjir."
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show niko senang at left_position
-    play sound "audio/ID/Niko 21.mp3"
+    $ play_dialogue("audio/ID/Niko 21.mp3")
     niko "Kita berhasil sampai di tempat aman sebelum air naik!"
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show bu sari senyum at left_position
-    play sound "audio/ID/Bu Sari 19.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 19.mp3")
     bu_sari "Bagus! Kalian selamat karena bertindak cepat dan tertib. Ini contoh yang benar saat darurat."
     hide bu sari
     with dissolve
@@ -1300,21 +1323,21 @@ label scene_3_6_2:
     with dissolve
 
     show rara kecewa at right_position
-    play sound "audio/ID/Rara 22.mp3"
+    $ play_dialogue("audio/ID/Rara 22.mp3")
     rara "Oh tidak! Airnya sudah sampai ke meja!"
     hide rara
     with dissolve
     stop sound fadeout 1.0
 
     show niko panik at left_position
-    play sound "audio/ID/Niko 22.mp3"
+    $ play_dialogue("audio/ID/Niko 22.mp3")
     niko "Kita seharusnya tidak menunggu! Sekarang banyak barang rusak!"
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show bu sari pasrah at left_position
-    play sound "audio/ID/Bu Sari 20.mp3"
+    $ play_dialogue("audio/ID/Bu Sari 20.mp3")
     bu_sari "Kita harus belajar dari ini. Jangan tunda tindakan saat banjir, keselamatan itu yang utama."
     hide bu sari
     with dissolve
@@ -1331,56 +1354,56 @@ label scene_3_7:
     with dissolve
 
     show pak ardi senyum at left_position
-    play sound "audio/ID/Pak Ardi 12.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 12.mp3")
     pak_ardi "Kita harus belajar dari pengalaman ini. Banjir bukan hanya karena hujan, tapi juga karena kita kurang peduli lingkungan."
     hide pak ardi
     with dissolve
     stop sound fadeout 1.0
 
     show niko info2 at right_position
-    play sound "audio/ID/Niko 23.mp3"
+    $ play_dialogue("audio/ID/Niko 23.mp3")
     niko "Kita harus menjaga saluran air tetap bersih. Ayo adakan kegiatan bersih-bersih tiap minggu!"
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show warga1 at left_position
-    play sound "audio/ID/Warga 3.mp3"
+    $ play_dialogue("audio/ID/Warga 3.mp3")
     warga1 "Bagaimana kalau kita bikin kelompok relawan kebersihan sungai?"
     hide warga1
     with dissolve
     stop sound fadeout 1.0
 
     show warga3 at right_position
-    play sound "audio/ID/Warga 4.mp3"
+    $ play_dialogue("audio/ID/Warga 4.mp3")
     warga3 "Kita juga bisa mengadakan pelatihan rutin tentang bencana!"
     hide warga3
     with dissolve
     stop sound fadeout 1.0
 
     show pak ardi senyum at left_position
-    play sound "audio/ID/Pak Ardi 13.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 13.mp3")
     pak_ardi "Bagus! Selain itu, mari tanam lebih banyak pohon di hulu sungai."
     hide pak ardi
     with dissolve
     stop sound fadeout 1.0
 
     show niko info at left_position
-    play sound "audio/ID/Niko 24.mp3"
+    $ play_dialogue("audio/ID/Niko 24.mp3")
     niko "Ayo buat poster dan spanduk larangan buang sampah sembarangan!"
     hide niko
     with dissolve
     stop sound fadeout 1.0
 
     show warga2 at right_position
-    play sound "audio/ID/Warga 5.mp3"
+    $ play_dialogue("audio/ID/Warga 5.mp3")
     warga2 "Setuju! Kita juga bisa buat sumur resapan untuk menyerap air hujan."
     hide warga2
     with dissolve
     stop sound fadeout 1.0
 
     show pak ardi senyum at left_position
-    play sound "audio/ID/Pak Ardi 14.mp3"
+    $ play_dialogue("audio/ID/Pak Ardi 14.mp3")
     pak_ardi "Dengan kerja sama, desa kita akan lebih siap menghadapi banjir. Mari kita mulai sekarang!"
     hide pak ardi
     with dissolve
@@ -1388,19 +1411,19 @@ label scene_3_7:
 
     # Narasi akhir
     scene bg b
-    play sound "audio/ID/Narasi 4.mp3"
+    $ play_dialogue("audio/ID/Narasi 4.mp3")
     show text Text(
         "Melalui pengalaman ini, Rara, Niko, dan warga Desa Lereng Damai belajar bahwa menjaga lingkungan adalah kunci mencegah banjir. Menanam pohon, membersihkan saluran air, dan mengenali tanda bahaya adalah langkah penting untuk melindungi diri dan masyarakat. Dengan kerja sama seluruh warga, desa mereka bisa lebih aman dari banjir di masa depan.",
         size=36,
         color="#179940",
-        slow=True,          
-        slow_cps=30,        
-        xalign=0.5,         
-        yalign=-0.1,         
-        text_align=0.5,     
-        justify=True,       
-        xmaximum=900,       
-        line_spacing=10,    
+        slow=True,     
+        slow_cps=30,    
+        xalign=0.5,     
+        yalign=-0.1,     
+        text_align=0.5,   
+        justify=True,    
+        xmaximum=900,    
+        line_spacing=10,  
         layout="subtitle"
     )
 

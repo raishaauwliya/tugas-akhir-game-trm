@@ -26,8 +26,10 @@ screen quick_voice_toggle():
                         style "quick_button"
 
                         action If(is_voice_enabled,
-                            Preference("voice volume", 0.0), # Matikan
-                            Preference("voice volume", 1.0)  # Nyalakan
+                            # When turning OFF: Set both Voice and Sound to 0
+                            [Preference("voice volume", 0.0), Preference("sound volume", 0.0)], 
+                            # When turning ON: Set both to 1.0
+                            [Preference("voice volume", 1.0), Preference("sound volume", 1.0)]
                         )
                         hovered Show("quick_voice_toggle")
 
