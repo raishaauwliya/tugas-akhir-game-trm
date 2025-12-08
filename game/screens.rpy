@@ -61,16 +61,14 @@ style vscrollbar:
     thumb Frame("gui/scrollbar/vertical_[prefix_]thumb.png", gui.vscrollbar_borders, tile=gui.scrollbar_tile)
 
 style slider:
-    variant "small"
     ysize gui.slider_size
-    base_bar Frame("gui/phone/slider/horizontal_[prefix_]bar.png", gui.slider_borders, tile=gui.slider_tile)
-    thumb "gui/phone/slider/horizontal_[prefix_]thumb.png"
+    base_bar Frame("gui/slider/horizontal_[prefix_]bar.png", gui.slider_borders, tile=gui.slider_tile)
+    thumb "gui/slider/horizontal_[prefix_]thumb.png"
 
 style vslider:
-    variant "small"
     xsize gui.slider_size
-    base_bar Frame("gui/phone/slider/vertical_[prefix_]bar.png", gui.vslider_borders, tile=gui.vslider_tile)
-    thumb "gui/phone/slider/vertical_[prefix_]thumb.png"
+    base_bar Frame("gui/slider/vertical_[prefix_]bar.png", gui.vslider_borders, tile=gui.slider_tile)
+    thumb "gui/slider/vertical_[prefix_]thumb.png"
 
 
 style frame:
@@ -85,7 +83,7 @@ style frame:
 
 
 ## Say screen ##################################################################
-## Custom textbox + namebox tanpa asset tambahan
+## Custom textbox + namebox
 ###############################################################################
 
 screen say(who, what):
@@ -99,8 +97,8 @@ screen say(who, what):
         xsize 0.96          # 96% lebar layar
         ysize 210           # tinggi textbox
 
-        background Solid("#00000080")    # hitam transparan
-        padding (48, 26)    # padding kiri/kanan, atas/bawah di dalam textbox
+        background Solid("#00000080")     # hitam transparan
+        padding (48, 26)                  # padding kiri/kanan, atas/bawah di dalam textbox
 
         at textbox_elev
 
@@ -129,9 +127,8 @@ screen say(who, what):
             background Solid("#1C8CF2CC")   # biru transparan
             padding (18, 8)
 
-            # Posisi nempel di tepi atas textbox (untuk 1280x720)
             xpos 120
-            ypos gui.textbox_height + 500
+            ypos gui.textbox_height + 500  # posisi seperti sebelumnya
 
             at name_pop
 
@@ -236,8 +233,6 @@ style input:
 
 ## Choice screen ###############################################################
 
-## Choice screen ###############################################################
-
 screen choice(items):
     style_prefix "choice"
     modal True
@@ -261,7 +256,7 @@ screen choice(items):
         xsize 0.96          # sama lebar dengan textbox dialog
         ysize 140
 
-        background Solid("#00000080")    # hitam transparan seperti textbox dialog
+        background Solid("#00000080")     # hitam transparan seperti textbox dialog
         padding (24, 20)
 
         at textbox_elev
@@ -279,39 +274,30 @@ screen choice(items):
             yalign 0.5
             text_align 0.5
 
+screen language_select():
+    modal True
+    style_prefix "choice"
+    zorder 50
 
-style choice_vbox is vbox
-style choice_button is button
-style choice_button_text is button_text
+    vbox:
+        spacing 24
+        xalign 0.5
+        yalign 0.35
 
-# vbox pilihan – sekarang cuma atur tengah & spacing,
-# posisi vertikal diatur langsung di screen (yalign 0.35).
-style choice_vbox:
-    xalign 0.5
-    spacing gui.choice_spacing
+        # TEKS JUDUL – HANYA TEKS, TIDAK BISA DIKLIK
+        text "Pilih Bahasa / Choose Language":
+            size 40
+            color "#FFFFFF"
+            outlines [(2, "#000000AA", 0, 0)]
+            xalign 0.5
 
-style choice_button is default:
-    properties gui.button_properties("choice_button")
+        # TOMBOL PILIH BAHASA INDONESIA
+        textbutton "Bahasa Indonesia":
+            action [ SetVariable("language_queued", None), Return(True) ]
 
-style choice_button_text is default:
-    properties gui.text_properties("choice_button")
-
-style choice_vbox is vbox
-style choice_button is button
-style choice_button_text is button_text
-
-# vbox pilihan – sekarang cuma atur tengah & spacing,
-# posisi vertikal diatur langsung di screen (yalign 0.35).
-style choice_vbox:
-    xalign 0.5
-    spacing gui.choice_spacing
-
-style choice_button is default:
-    properties gui.button_properties("choice_button")
-
-style choice_button_text is default:
-    properties gui.text_properties("choice_button")
-
+        # TOMBOL PILIH BAHASA INGGRIS
+        textbutton "English":
+            action [ SetVariable("language_queued", "english"), Return(True) ]
 
 style choice_vbox is vbox
 style choice_button is button
@@ -323,8 +309,8 @@ style choice_vbox:
     spacing 18
 
 style choice_button:
-    xminimum 720        # lebar kotak
-    yminimum 60         # tinggi kotak
+    xminimum 720         # lebar kotak
+    yminimum 60          # tinggi kotak
     xalign 0.5
     padding (30, 14)
     background Solid("#000000CC")       # kotak gelap transparan
@@ -340,7 +326,8 @@ style choice_button_text:
 
 
 
-## Quick Menu screen (versi samping kanan)
+## Quick Menu screen (versi samping kanan) ####################################
+
 screen quick_menu():
 
     zorder 100
@@ -350,11 +337,10 @@ screen quick_menu():
         vbox:
             style_prefix "quick"
 
-            xalign 0.98       # posisikan di sisi kanan
-            yalign 0.1       # agak di tengah bawah
+            xalign 0.98       # di sisi kanan
+            yalign 0.30
             spacing 6
 
-            # urutan tombol seperti di bawah, bisa kamu ubah sesuai selera
             textbutton _("Back") action Rollback()
             textbutton _("History") action ShowMenu('history')
             textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
@@ -368,7 +354,7 @@ screen quick_menu():
 style quick_button:
     xminimum 140
     yminimum 36
-    background Solid("#00000080")  # transparan sama kayak textbox
+    background Solid("#00000080")   # transparan seperti textbox
     padding (12, 6)
     hover_background Solid("#FFFFFF30")
     xalign 1.0
@@ -382,12 +368,52 @@ style quick_button_text:
 
 
 
-## This code ensures that the quick_menu screen is displayed in-game, whenever
-## the player has not explicitly hidden the interface.
+## Tombol NEXT khusus ##########################################################
+
+# Flag global: aktifkan / matikan sistem "wajib Next"
+default quick_menu = True
+default next_lock = True
+
+# Overlay: blok semua klik dismiss, paksa pakai tombol Next
+screen click_next():
+
+    # Next hanya muncul & aktif kalau:
+    # - bukan main_menu
+    # - next_lock == True
+    if (not main_menu) and next_lock:
+
+        # blok klik biasa (dismiss)
+        dismiss action NullAction()
+
+        # tombol Next di kanan bawah
+        textbutton _("Next"):
+            style "next_button"
+            xalign 0.93
+            yalign 0.93
+            action Return()
+
+
+style next_button is default
+style next_button_text is default
+
+style next_button:
+    background Solid("#FFFFFF")         # putih solid
+    hover_background Solid("#DDDDDD")         # hover abu terang
+    padding (18, 8)
+    xminimum 140
+    yminimum 48
+
+style next_button_text:
+    color "#000000"
+    hover_color "#000000"
+    outlines [(1, "#00000040", 0, 0)]  # shadow lembut
+    size 24
+
+## Daftarkan overlay screens ###################################################
+
 init python:
     config.overlay_screens.append("quick_menu")
-
-default quick_menu = True
+    config.overlay_screens.append("click_next")
 
 
 
@@ -507,7 +533,8 @@ style main_menu_version:
 
 ## Game Menu screen ############################################################
 
-screen game_menu(title, scroll=None, yinitial=0.0, spacing=0):
+screen game_menu(title, scroll=None, yinitial=0.0, rolling_navigation=False, spacing=0):
+    # Parameter rolling_navigation ditambahkan untuk menjaga kompatibilitas
 
     style_prefix "game_menu"
 
@@ -648,7 +675,6 @@ screen about():
                 text "[gui.about!t]\n"
 
             text _("Made with {a=https://www.renpy.org/}Ren'Py{/a} [renpy.version_only].\n\n[renpy.license!t]")
-
 
 style about_label is gui_label
 style about_label_text is gui_label_text
@@ -850,18 +876,43 @@ screen preferences():
                         hbox:
                             bar value Preference("sound volume")
 
-                            if config.sample_sound:
-                                textbutton _("Test") action Play("sound", config.sample_sound)
-
-
                     if config.has_voice:
                         label _("Voice Volume")
 
                         hbox:
                             bar value Preference("voice volume")
 
-                            if config.sample_voice:
-                                textbutton _("Test") action Play("voice", config.sample_voice)
+                        # ====================================================================
+                        # C. Tombol Toggle Voice (Integrasi ke Preferences Screen) - FINAL FIX
+                        # ====================================================================
+                        
+                        # --- PERBAIKAN DI SINI ---
+                        # Menggunakan _preferences.volumes.get() agar AMAN dan tidak ERROR
+                        # di Ren'Py 8.3.7. Jangan ubah baris ini.
+                        $ is_voice_enabled = _preferences.volumes.get("voice", 1.0) > 0.0
+                        
+                        # Kotak vertikal yang menampung label dan tombol toggle
+                        vbox:
+                            style_prefix "radio"
+                            label _("Voice Character") # Label di menu preferensi
+                            
+                            hbox:
+                                spacing 20
+                                
+                                # Tombol untuk mengaktifkan Voice
+                                textbutton _("ON"):
+                                    action Preference("voice volume", 1.0) # Set volume ke 1.0
+                                    selected is_voice_enabled
+                                    
+                                # Tombol untuk menonaktifkan Voice
+                                textbutton _("OFF"):
+                                    action Preference("voice volume", 0.0) # Set volume ke 0.0
+                                    selected not is_voice_enabled
+                        
+                        # ====================================================================
+                        # Akhir Bagian Voice Toggle
+                        # ====================================================================
+
 
                     if config.has_music or config.has_sound or config.has_voice:
                         null height gui.pref_spacing
@@ -1429,6 +1480,7 @@ style nvl_button_text:
     properties gui.text_properties("nvl_button")
 
 
+
 ## Bubble screen ###############################################################
 
 screen bubble(who, what):
@@ -1609,7 +1661,7 @@ style slider:
 style vslider:
     variant "small"
     xsize gui.slider_size
-    base_bar Frame("gui/phone/slider/vertical_[prefix_]bar.png", gui.slider_borders, tile=gui.slider_tile)
+    base_bar Frame("gui/phone/slider/vertical_[prefix_]bar.png", gui.vslider_borders, tile=gui.slider_tile)
     thumb "gui/phone/slider/vertical_[prefix_]thumb.png"
 
 style slider_vbox:

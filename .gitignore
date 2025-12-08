@@ -4,3 +4,5 @@ traceback.txt
 *.rpyc
 cache/
 __pycache__/
+*.save
+navigation.json
