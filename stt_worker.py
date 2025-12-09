@@ -2,149 +2,160 @@
 """
 stt_worker.py
 -------------
-External speech-to-text worker for Ren'Py.
-Robust Version: Works with OR without an API Key.
+ULTRA-LOW LATENCY VERSION
+- Lazy Imports: Library berat (requests, base64) baru di-load SETELAH merekam.
+- Mic menyala secepat mungkin untuk menghindari kalimat terpotong.
 """
 
 import sys
 import json
 import argparse
-import traceback
 import os
 
-# --- 1. SAFE IMPORT FOR DOTENV ---
-# If user doesn't have python-dotenv installed, we just skip it.
-try:
-    from dotenv import load_dotenv
-except ImportError:
-    load_dotenv = None
+# --- GLOBAL DEBUG ---
+DEBUG_MODE = False
 
+def debug_log(msg):
+    if DEBUG_MODE:
+        sys.stderr.write(f"[DEBUG] {msg}\n")
+        sys.stderr.flush()
+
+# Import ini wajib di awal agar bisa akses Mic
 try:
     import speech_recognition as sr
-except ImportError:
-    sys.stdout.write(json.dumps({
-        "ok": False,
-        "text": None,
-        "error": "SpeechRecognition module not installed."
-    }) + "\n")
+except ImportError as e:
+    sys.stdout.write(json.dumps({"ok": False, "error": f"Missing lib: {e}"}) + "\n")
     sys.exit(1)
 
+# --- FUNGSI LOAD API KEY (Cek Env Var Saja biar Cepat) ---
+def get_api_key_fast():
+    # Prioritaskan Environment Variable System (Paling Cepat)
+    return os.getenv("GOOGLE_API_KEY")
 
-def get_api_key():
-    """
-    Safely attempts to load the GOOGLE_API_KEY.
-    Returns: 
-        - String (The Key) if found.
-        - None if not found (Triggers default behavior).
-    """
-    api_key = None
+# --- FUNGSI PROSES (REST API) ---
+def process_with_rest_api(audio, api_key, lang_code):
+    debug_log("Processing: Importing heavy libs now...")
     
-    # Only try loading if the library exists
-    if load_dotenv:
-        try:
-            # Find .env in the same folder as this script
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            env_path = os.path.join(current_dir, ".env")
-            
-            # Load it (silently fails if file doesn't exist)
-            load_dotenv(env_path)
-            
-            # Get variable
-            raw_key = os.getenv("GOOGLE_API_KEY")
-            
-            # Clean it up (remove spaces)
-            if raw_key and raw_key.strip():
-                api_key = raw_key.strip()
-                
-        except Exception:
-            # If anything goes wrong reading the file, just ignore it 
-            # and return None so the script keeps running.
-            pass
-            
-    return api_key
+    # ⚡ LAZY IMPORT: Di-load hanya SETELAH rekaman selesai
+    # Ini menghemat waktu startup di awal.
+    import base64
+    import requests 
+    
+    try:
+        wav_data = audio.get_wav_data()
+        audio_content = base64.b64encode(wav_data).decode("utf-8")
+
+        url = "https://speech.googleapis.com/v1/speech:recognize"
+        params = {"key": api_key}
+        payload = {
+            "config": {
+                "encoding": "LINEAR16",
+                "sampleRateHertz": audio.sample_rate,
+                "languageCode": lang_code,
+            },
+            "audio": { "content": audio_content }
+        }
+
+        response = requests.post(url, params=params, json=payload, timeout=5)
+        
+        if response.status_code != 200:
+            return None, f"Google Error {response.status_code}"
+
+        result_json = response.json()
+        if "results" in result_json:
+            return result_json["results"][0]["alternatives"][0]["transcript"], None
+        else:
+            return "", None 
+    except Exception as e:
+        return None, str(e)
+
+
+# --- FUNGSI PROSES (FALLBACK) ---
+def process_with_library_default(audio, lang_code):
+    debug_log("Processing: Fallback method...")
+    r = sr.Recognizer()
+    try:
+        text = r.recognize_google(audio, language=lang_code, key=None)
+        return text, None
+    except sr.UnknownValueError:
+        return "", None
+    except Exception as e:
+        return None, str(e)
 
 
 def main():
+    global DEBUG_MODE
     parser = argparse.ArgumentParser()
-    parser.add_argument("--lang", default="id-ID", help="Language code")
-    parser.add_argument("--timeout", type=float, default=8.0)
-    parser.add_argument("--phrase-time-limit", type=float, default=7.0)
+    parser.add_argument("--lang", default="id-ID")
+    parser.add_argument("--timeout", type=float, default=5.0)
+    parser.add_argument("--phrase-time-limit", type=float, default=5.0)
     parser.add_argument("--device-index", type=int, default=None)
+    parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
 
-    # --- 2. GET KEY (OR NONE) ---
-    google_key = get_api_key()
+    if args.debug: DEBUG_MODE = True
 
+    # 1. SETUP MIC SECEPAT MUNGKIN
     r = sr.Recognizer()
+    
+    # Setting Sensitivitas Statis (Tanpa Kalibrasi = Instant)
+    r.energy_threshold = 300  
+    r.dynamic_energy_threshold = False 
+    
+    # Deteksi diam lebih cepat (0.4 detik diam = selesai)
+    r.pause_threshold = 0.4
+    r.non_speaking_duration = 0.3
 
-    # --- 3. SETUP MICROPHONE ---
     try:
+        # Buka Mic
         if args.device_index is not None:
             source = sr.Microphone(device_index=args.device_index)
         else:
             source = sr.Microphone()
+            
+        with source:
+            debug_log("LISTENING NOW (Libs loading later)...")
+            
+            # --- MULAI REKAM ---
+            # Di titik ini, library 'requests' belum di-load.
+            # Jadi kita sampai di baris ini lebih cepat (~300-500ms lebih cepat).
+            audio = r.listen(source, timeout=args.timeout, phrase_time_limit=args.phrase_time_limit)
+            
+            debug_log("Audio Captured. Now loading libs...")
+
     except Exception as e:
-        sys.stdout.write(json.dumps({
-            "ok": False,
-            "text": None,
-            "error": f"Microphone error: {e}"
-        }) + "\n")
+        sys.stdout.write(json.dumps({"ok": False, "error": f"Mic Error: {e}"}) + "\n")
         return
 
-    # --- 4. LISTEN ---
-    with source:
+    # 2. SELESAI REKAM -> BARU IMPORT LAIN-LAIN
+    # User tidak akan sadar ada delay di sini, karena mereka sudah selesai bicara.
+    
+    # Coba load .env (opsional, ditaruh di sini biar gak ganggu start awal)
+    api_key = get_api_key_fast()
+    if not api_key:
         try:
-            r.adjust_for_ambient_noise(source, duration=1.0)
-            audio = r.listen(source, timeout=args.timeout, phrase_time_limit=args.phrase_time_limit)
-        except Exception as e:
-            sys.stdout.write(json.dumps({
-                "ok": False,
-                "text": None,
-                "error": f"Listening error: {e}"
-            }) + "\n")
-            return
+            from dotenv import load_dotenv
+            load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+            api_key = os.getenv("GOOGLE_API_KEY")
+        except:
+            pass
 
-    # --- 5. RECOGNIZE (ROBUST) ---
-    try:
-        # NOTE: 
-        # If google_key is 'None', the library automatically uses 
-        # the default public generic key. It will STILL work.
-        text = r.recognize_google(audio, language=args.lang, key=google_key)
-        
-        sys.stdout.write(json.dumps({
-            "ok": True,
-            "text": text,
-            "error": None
-        }) + "\n")
+    text_result = None
+    error_msg = None
 
-    except sr.UnknownValueError:
-        sys.stdout.write(json.dumps({
-            "ok": False,
-            "text": None,
-            "error": "Speech not understood"
-        }) + "\n")
-    except sr.RequestError as e:
-        # Specific error handling
-        error_msg = str(e)
-        if "quota" in error_msg.lower():
-            sys.stdout.write(json.dumps({
-                "ok": False,
-                "text": None,
-                "error": "API Quota Exceeded (Try adding a custom API Key)"
-            }) + "\n")
-        else:
-            sys.stdout.write(json.dumps({
-                "ok": False,
-                "text": None,
-                "error": f"Connection/API error: {e}"
-            }) + "\n")
-    except Exception:
-        sys.stdout.write(json.dumps({
-            "ok": False,
-            "text": None,
-            "error": "Unexpected: " + traceback.format_exc()
-        }) + "\n")
+    # 3. KIRIM DATA
+    if api_key:
+        text_result, error_msg = process_with_rest_api(audio, api_key, args.lang)
+    
+    # Fallback Logic
+    if (not api_key) or (error_msg and "Google Error" in error_msg):
+        text_result, error_msg = process_with_library_default(audio, args.lang)
 
+    # 4. OUTPUT
+    if error_msg is not None:
+        sys.stdout.write(json.dumps({"ok": False, "text": None, "error": error_msg}) + "\n")
+    else:
+        sys.stdout.write(json.dumps({"ok": True, "text": text_result, "error": None}) + "\n")
 
 if __name__ == "__main__":
     main()
