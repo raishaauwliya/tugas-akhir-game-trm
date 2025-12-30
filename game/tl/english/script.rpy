@@ -21,7 +21,7 @@ translate english strings:
     old "Suasana ruang klub terasa hangat dan penuh semangat."
     new "The club room feels warm and full of enthusiasm."
 
-    old "Halo teman-teman! Selamat datang di Klub Sahabat Alam. Di sini, kita kan belajar bagaimana cara menjaga alam dan juga cara menghadapi bencana alam supaya kita tetap aman."
+    old "Halo teman-teman! Selamat datang di Klub Sahabat Alam. Di sini, kita akan belajar bagaimana cara menjaga alam dan juga cara menghadapi bencana alam supaya kita tetap aman."
     new "Hello everyone! Welcome to the Nature Friends Club. Here, we’ll learn how to care for nature and how to deal with natural disasters so we can stay safe."
 
     old "Iya, betul banget, Adrian. Di Indonesia, kita punya banyak sekali keindahan alam, tapi juga ada bencana yang kadang terjadi, seperti longsor dan banjir. Jadi, penting banget kita tahu cara menghadapinya."
@@ -149,6 +149,9 @@ translate english strings:
     old "Pelankan langkah! Jangan sampai terpeleset!"
     new "Slow down! Don’t slip!"
 
+    old "Pelankan langkah! Jangan sampai terjatuh!"
+    new "Slow down! Don’t fall!"
+
     old "Benar… lebih baik hati-hati daripada jatuh."
     new "Right… better be careful than fall."
 
@@ -207,8 +210,8 @@ translate english strings:
     old "Anak-anak, hari ini kita akan belajar tentang banjir. Siapa yang tahu apa itu banjir?"
     new "Kids, today we’re going to learn about floods. Who knows what a flood is?"
 
-    old "Itu saat air meluap dan menggenangi jalan atau rumah, kan Bu?"
-    new "It’s when water overflows and inundates roads or houses, right, Ma’am?"
+    old "Banjir Itu saat air meluap dan menggenangi jalan atau rumah, kan Bu?"
+    new "A flood is when water overflows and inundates roads or houses, right, Ma’am?"
 
     old "Betul sekali Niko! Banjir terjadi ketika air meluap dari sungai atau hujan turun sangat deras sehingga tanah tidak bisa menyerapnya."
     new "Exactly, Niko! Floods occur when water overflows from a river or when rain falls so heavily that the ground can’t absorb it."
@@ -224,6 +227,9 @@ translate english strings:
 
     old "Terima kasih sudah datang! Menanam pohon sangat penting untuk mencegah banjir. Pohon membantu menyerap air hujan dan mencegah erosi tanah."
     new "Thank you for coming! Planting trees is very important to prevent floods. Trees help absorb rainwater and prevent soil erosion."
+
+    old "Kenapa pohon bisa membantu mencegah banjir, Pak?"
+    new "Why can trees help prevent floods, Sir?"
 
     old "Akar pohon menyerap air hujan sehingga tanah tidak cepat jenuh air. Pohon juga memperlambat aliran air ke sungai, jadi sungai tidak langsung meluap."
     new "Tree roots absorb rainwater so the soil doesn’t become saturated quickly. Trees also slow the flow of water into the river, so it doesn’t overflow right away."
@@ -330,3 +336,18 @@ translate english strings:
     # ==== Banjir closing narration (Text()) ====
     old "Melalui pengalaman ini, Rara, Niko, dan warga Desa Lereng Damai belajar bahwa menjaga lingkungan adalah kunci mencegah banjir. Menanam pohon, membersihkan saluran air, dan mengenali tanda bahaya adalah langkah penting untuk melindungi diri dan masyarakat. Dengan kerja sama seluruh warga, desa mereka bisa lebih aman dari banjir di masa depan."
     new "Through this experience, Rara, Niko, and the people of Lereng Damai learned that caring for the environment is the key to preventing floods. Planting trees, cleaning drainage channels, and recognizing warning signs are important steps to protect ourselves and the community. With everyone working together, their village can be safer from floods in the future."
+
+    old "Katakan topik apa yang ingin kamu pelajari:\n• Belajar tentang Longsor\n• Belajar tentang Banjir"
+    new "State the topic you want to learn about:\n• Learn about landslides\n• Learn about floods"
+
+    old "Katakan Tindakan apa yang ingin kamu ambil?\n• Ayo langsung laporkan ke Pak Ardi!\n• Tunggu dulu, ini cuma retakan kecil."
+    new "State the action you want to take?\n• Let’s report it to Mr. Ardi right away!\n• Wait a minute, it’s just a small crack."
+
+    old "Tindakan apa yang ingin kamu ambil?\n• Tetap tenang dan ikuti jalur evakuasi.\n• Panik dan lari sembarangan"
+    new "What action do you want to take?\n• Stay calm and follow the evacuation route.\n• Panic and run randomly"
+
+    old "Katakan Tindakan apa yang ingin kamu ambil?\n• Ayo langsung laporkan ke Pak Ardi!.\n• Tunggu dulu, sepertinya tidak akan sampai naik terlalu tinggi."
+    new "State the action you want to take?\n• Let’s report it to Mr. Ardi right away!.\n• Wait a bit, it probably won’t rise too high."
+
+    old "Katakan Tindakan apa yang ingin kamu ambil?\n• Segera ambil barang berharga dan keluar dari rumah!.\n• Tunggu sebentar dan lihat apakah airnya naik."
+    new "State the action you want to take?\n• Quickly take valuable items and get out of the house!.\n• Wait a bit and see if the water rises."    

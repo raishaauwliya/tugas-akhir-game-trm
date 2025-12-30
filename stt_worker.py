@@ -2,160 +2,138 @@
 """
 stt_worker.py
 -------------
-ULTRA-LOW LATENCY VERSION
-- Lazy Imports: Library berat (requests, base64) baru di-load SETELAH merekam.
-- Mic menyala secepat mungkin untuk menghindari kalimat terpotong.
+BARE METAL VERSION
+- Removed 'argparse' (heavy) -> Uses manual argument parsing.
+- Removed 'traceback' & 'os' from startup.
+- Absolute minimal code before recording starts.
 """
 
 import sys
 import json
-import argparse
-import os
 
-# --- GLOBAL DEBUG ---
-DEBUG_MODE = False
-
-def debug_log(msg):
-    if DEBUG_MODE:
-        sys.stderr.write(f"[DEBUG] {msg}\n")
-        sys.stderr.flush()
-
-# Import ini wajib di awal agar bisa akses Mic
+# --- 1. CRITICAL IMPORTS ONLY ---
 try:
     import speech_recognition as sr
 except ImportError as e:
-    sys.stdout.write(json.dumps({"ok": False, "error": f"Missing lib: {e}"}) + "\n")
+    sys.stdout.write('{"ok": false, "error": "Missing speech_recognition"}\n')
     sys.exit(1)
 
-# --- FUNGSI LOAD API KEY (Cek Env Var Saja biar Cepat) ---
-def get_api_key_fast():
-    # Prioritaskan Environment Variable System (Paling Cepat)
-    return os.getenv("GOOGLE_API_KEY")
+# --- 2. FAST MANUAL ARGUMENT PARSING ---
+# We avoid argparse to save startup time.
+# Defaults:
+lang_code = "id-ID"
+timeout = 15.0
+phrase_limit = 14.0
+device_idx = None
+debug_mode = False
 
-# --- FUNGSI PROSES (REST API) ---
-def process_with_rest_api(audio, api_key, lang_code):
-    debug_log("Processing: Importing heavy libs now...")
+args = sys.argv[1:]
+for i, arg in enumerate(args):
+    if arg == "--lang" and i+1 < len(args):
+        lang_code = args[i+1]
+    elif arg == "--debug":
+        debug_mode = True
+    elif arg == "--device-index" and i+1 < len(args):
+        try: device_idx = int(args[i+1])
+        except: pass
+
+def debug_log(msg):
+    if debug_mode:
+        sys.stderr.write(f"[DEBUG] {msg}\n")
+        sys.stderr.flush()
+
+# --- 3. INSTANT RECORDING START ---
+try:
+    r = sr.Recognizer()
     
-    # ⚡ LAZY IMPORT: Di-load hanya SETELAH rekaman selesai
-    # Ini menghemat waktu startup di awal.
+    # HARDCODED OPTIMIZATION (No dynamic calculation)
+    r.energy_threshold = 300
+    r.dynamic_energy_threshold = False
+    r.pause_threshold = 0.6
+    r.non_speaking_duration = 0.5
+
+    # Open Mic
+    if device_idx is not None:
+        source = sr.Microphone(device_index=device_idx)
+    else:
+        source = sr.Microphone()
+
+    with source:
+        debug_log("LISTENING (Bare Metal)...")
+        # ⚡ THE MOMENT OF TRUTH
+        audio = r.listen(source, timeout=timeout, phrase_time_limit=phrase_limit)
+        debug_log("Captured.")
+
+except Exception as e:
+    # Manual JSON construction is faster than loading json library for simple errors? 
+    # No, we kept json imported. It's fine.
+    sys.stdout.write(json.dumps({"ok": False, "error": f"Mic Error: {e}"}) + "\n")
+    sys.exit(0)
+
+# --- 4. LAZY LOAD EVERYTHING ELSE ---
+# The user has stopped speaking. Now we load the heavy internet tools.
+import os
+
+def get_api_key_fast():
+    # 1. System Env (Fastest)
+    key = os.getenv("GOOGLE_API_KEY")
+    if key: return key
+    
+    # 2. .env file (Slower, only if needed)
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(os.path.join(os.path.dirname(os.path.abspath(_file_)), ".env"))
+        return os.getenv("GOOGLE_API_KEY")
+    except:
+        return None
+
+def process_rest(audio, key, lang):
+    debug_log("Loading REST libs...")
+    import requests
     import base64
-    import requests 
     
     try:
         wav_data = audio.get_wav_data()
-        audio_content = base64.b64encode(wav_data).decode("utf-8")
-
+        content = base64.b64encode(wav_data).decode("utf-8")
+        
         url = "https://speech.googleapis.com/v1/speech:recognize"
-        params = {"key": api_key}
+        params = {"key": key}
         payload = {
             "config": {
-                "encoding": "LINEAR16",
-                "sampleRateHertz": audio.sample_rate,
-                "languageCode": lang_code,
+                "encoding": "LINEAR16", 
+                "sampleRateHertz": audio.sample_rate, 
+                "languageCode": lang
             },
-            "audio": { "content": audio_content }
+            "audio": {"content": content}
         }
-
-        response = requests.post(url, params=params, json=payload, timeout=5)
         
-        if response.status_code != 200:
-            return None, f"Google Error {response.status_code}"
-
-        result_json = response.json()
-        if "results" in result_json:
-            return result_json["results"][0]["alternatives"][0]["transcript"], None
-        else:
-            return "", None 
-    except Exception as e:
-        return None, str(e)
-
-
-# --- FUNGSI PROSES (FALLBACK) ---
-def process_with_library_default(audio, lang_code):
-    debug_log("Processing: Fallback method...")
-    r = sr.Recognizer()
-    try:
-        text = r.recognize_google(audio, language=lang_code, key=None)
-        return text, None
-    except sr.UnknownValueError:
+        resp = requests.post(url, params=params, json=payload, timeout=5)
+        if resp.status_code != 200: return None, f"Google Error {resp.status_code}"
+        
+        data = resp.json()
+        if "results" in data:
+            return data["results"][0]["alternatives"][0]["transcript"], None
         return "", None
     except Exception as e:
         return None, str(e)
 
-
-def main():
-    global DEBUG_MODE
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--lang", default="id-ID")
-    parser.add_argument("--timeout", type=float, default=5.0)
-    parser.add_argument("--phrase-time-limit", type=float, default=5.0)
-    parser.add_argument("--device-index", type=int, default=None)
-    parser.add_argument("--debug", action="store_true")
-    args = parser.parse_args()
-
-    if args.debug: DEBUG_MODE = True
-
-    # 1. SETUP MIC SECEPAT MUNGKIN
-    r = sr.Recognizer()
-    
-    # Setting Sensitivitas Statis (Tanpa Kalibrasi = Instant)
-    r.energy_threshold = 300  
-    r.dynamic_energy_threshold = False 
-    
-    # Deteksi diam lebih cepat (0.4 detik diam = selesai)
-    r.pause_threshold = 0.4
-    r.non_speaking_duration = 0.3
-
+def process_fallback(audio, lang):
+    debug_log("Fallback...")
     try:
-        # Buka Mic
-        if args.device_index is not None:
-            source = sr.Microphone(device_index=args.device_index)
-        else:
-            source = sr.Microphone()
-            
-        with source:
-            debug_log("LISTENING NOW (Libs loading later)...")
-            
-            # --- MULAI REKAM ---
-            # Di titik ini, library 'requests' belum di-load.
-            # Jadi kita sampai di baris ini lebih cepat (~300-500ms lebih cepat).
-            audio = r.listen(source, timeout=args.timeout, phrase_time_limit=args.phrase_time_limit)
-            
-            debug_log("Audio Captured. Now loading libs...")
-
+        return r.recognize_google(audio, language=lang, key=None), None
     except Exception as e:
-        sys.stdout.write(json.dumps({"ok": False, "error": f"Mic Error: {e}"}) + "\n")
-        return
+        return None, str(e)
 
-    # 2. SELESAI REKAM -> BARU IMPORT LAIN-LAIN
-    # User tidak akan sadar ada delay di sini, karena mereka sudah selesai bicara.
-    
-    # Coba load .env (opsional, ditaruh di sini biar gak ganggu start awal)
-    api_key = get_api_key_fast()
-    if not api_key:
-        try:
-            from dotenv import load_dotenv
-            load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
-            api_key = os.getenv("GOOGLE_API_KEY")
-        except:
-            pass
+# --- 5. EXECUTION ---
+api_key = get_api_key_fast()
+text = None
+err = None
 
-    text_result = None
-    error_msg = None
+if api_key:
+    text, err = process_rest(audio, api_key, lang_code)
 
-    # 3. KIRIM DATA
-    if api_key:
-        text_result, error_msg = process_with_rest_api(audio, api_key, args.lang)
-    
-    # Fallback Logic
-    if (not api_key) or (error_msg and "Google Error" in error_msg):
-        text_result, error_msg = process_with_library_default(audio, args.lang)
+if (not api_key) or (err and "Google" in err):
+    text, err = process_fallback(audio, lang_code)
 
-    # 4. OUTPUT
-    if error_msg is not None:
-        sys.stdout.write(json.dumps({"ok": False, "text": None, "error": error_msg}) + "\n")
-    else:
-        sys.stdout.write(json.dumps({"ok": True, "text": text_result, "error": None}) + "\n")
-
-if __name__ == "__main__":
-    main()
+# Output
+sys.stdout.write(json.dumps({"ok": not err, "text": text, "error": err}) + "\n")
