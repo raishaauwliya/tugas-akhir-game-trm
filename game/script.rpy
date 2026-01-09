@@ -230,6 +230,67 @@ init python:
         renpy.notify("Tidak ada kata yang cukup tumpang tindih dengan pilihan yang tersedia.")
         return None
     
+    # AI LLM helper functions
+    def run_ai_llm(question):
+        import subprocess, os, json
+
+        script_path = os.path.join(config.basedir, "ai_llm_worker.py")
+        manual_python_exe = False
+        if manual_python_exe:
+            python_exe = r"C:\Users\m3g3n\AppData\Local\Programs\Python\Python312\python.exe"  # Ganti sesuai path Python-mu
+        else:
+            python_exe = r"C:\Users\raish\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe"
+
+        startupinfo = None
+        creationflags = 0
+        if renpy.windows:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            creationflags = subprocess.CREATE_NO_WINDOW
+
+        cmd = [python_exe, script_path, question]
+
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                startupinfo=startupinfo,
+                creationflags=creationflags,
+            )
+            raw_out, _ = proc.communicate(timeout=20)
+        except Exception:
+            return "Maaf, AI sedang tidak bisa menjawab sekarang."
+
+        try:
+            data = json.loads(raw_out)
+            if data.get("ok"):
+                return data.get("answer")
+            else:
+                return "Aku belum bisa menjawab pertanyaan itu."
+        except Exception:
+            return "Terjadi kesalahan saat memproses jawaban."
+    
+    def _ai_listen():
+        q = run_stt("id-ID")
+        if not q:
+            renpy.notify("Tidak ada suara terdeteksi.")
+            return
+
+        renpy.store.ai_question = q
+        renpy.store.ai_answer = "AI sedang menganalisa jawaban..."
+
+        answer = run_ai_llm(q)
+        renpy.store.ai_answer = answer
+
+
+    def _ai_reset():
+        renpy.store.ai_question = ""
+        renpy.store.ai_answer = "Silakan ajukan pertanyaan berikutnya."
+
+
+    
 
 # ====================================================================
 # DEFINISI KARAKTER DAN POSISI
