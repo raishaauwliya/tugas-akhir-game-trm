@@ -273,16 +273,61 @@ init python:
             return "Terjadi kesalahan saat memproses jawaban."
     
     def _ai_listen():
-        q = run_stt("id-ID")
-        if not q:
-            renpy.notify("Tidak ada suara terdeteksi.")
+
+    # ===============================
+    # Tentukan bahasa aktif
+    # ===============================
+        if is_english():
+            lang_code = "en-US"
+        else:
+            lang_code = "id-ID"
+
+        # ===============================
+        # Loop sampai suara valid
+        # ===============================
+        while True:
+
+            spoken = run_stt(lang_code)
+            if not spoken:
+                if is_english():
+                    renpy.notify("Sorry, I didn't catch your question.")
+                    renpy.store.ai_answer = "Please try speaking again."
+                else:
+                    renpy.notify("Tidak ada suara terdeteksi.")
+                    renpy.store.ai_answer = "Silakan coba bicara lagi."
+                return  # ← boleh return agar user klik mic lagi
+
+            spoken = spoken.strip()
+            renpy.log("AI STT recognized: {}".format(spoken))
+
+            # ===============================
+            # Validasi minimal teks
+            # ===============================
+            if len(spoken.split()) < 2:
+                if is_english():
+                    renpy.notify("Your question is too short.")
+                    renpy.store.ai_answer = "Please ask a more complete question."
+                else:
+                    renpy.notify("Pertanyaan terlalu singkat.")
+                    renpy.store.ai_answer = "Tolong ajukan pertanyaan yang lebih jelas."
+                return
+
+            # ===============================
+            # Tampilkan pertanyaan
+            # ===============================
+            renpy.store.ai_question = spoken
+            renpy.store.ai_answer = "AI sedang menganalisis jawaban..."
+
+            # ===============================
+            # Panggil AI LLM
+            # ===============================
+            answer = run_ai_llm(spoken)
+
+            # ===============================
+            # Tampilkan jawaban
+            # ===============================
+            renpy.store.ai_answer = answer
             return
-
-        renpy.store.ai_question = q
-        renpy.store.ai_answer = "AI sedang menganalisa jawaban..."
-
-        answer = run_ai_llm(q)
-        renpy.store.ai_answer = answer
 
 
     def _ai_reset():
@@ -1038,11 +1083,18 @@ label scene_refleksi_longsor:
         layout="subtitle"
     )
 
-    $ renpy.pause(20.0)
+    # ⛔ PENTING: hentikan auto-skip / auto-forward
+    $ renpy.pause(1.0, hard=True)
+
     hide text
     with dissolve
-
-    return
+    stop sound fadeout 1.0
+    menu:
+        "Apa yang ingin kamu lakukan?"
+        "🎤 Tanya AI tentang mitigasi bencana":
+            call ai_qna_session
+        "❌ Akhiri permainan":
+            return
 
 # ====================================================================
 # ALUR CERITA: BANJIR
@@ -1593,8 +1645,177 @@ label scene_3_7:
         layout="subtitle"
     )
 
-    $ renpy.pause(20.0)
+    # ⛔ PENTING: hentikan auto-skip / auto-forward
+    $ renpy.pause(1.0, hard=True)
+
     hide text
     with dissolve
+    stop sound fadeout 1.0
+    jump menu_akhir
+
+# ======================================================
+# AI QnA SESSION (dipanggil setelah ending cerita)
+# ======================================================
+
+label menu_akhir:
+
+    # Matikan UI bawaan
+    $ quick_menu = False
+    window hide
+
+    scene bg qna
+    with dissolve
+
+    menu:
+        "Apa yang ingin kamu lakukan?"
+        "🎤 Tanya AI tentang mitigasi bencana":
+            jump ai_qna
+
+        "❌ Akhiri permainan":
+            jump ending_game
+
+label ai_qna_session:
+
+    scene bg qna
+    with fade
+
+    $ _ai_reset()
+
+    if is_english():
+        "You can now ask questions about natural disaster mitigation."
+    else:
+        "Sekarang kamu bisa bertanya tentang mitigasi bencana alam."
+
+    # Screen akan stay sampai user tekan "Selesai"
+    call screen ai_qna_screen
 
     return
+
+label ai_qna:
+
+    scene bg qna
+    with dissolve
+
+    $ quick_menu = False
+    window hide
+
+    show text "Silakan ajukan pertanyaan tentang mitigasi bencana." at truecenter
+
+    $ _ai_listen()
+
+    hide text
+    show text ai_answer at truecenter
+
+    $ renpy.pause(5.0)
+
+    hide text
+    jump menu_akhir
+
+screen ai_qna_screen():
+
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+        xsize 1600
+        ysize 850
+        background "#EAF6EC"
+        padding (30, 30)
+
+        hbox:
+            spacing 40
+
+            # ============================
+            # KIRI — MIC & PERTANYAAN
+            # ============================
+            vbox:
+                xsize 420
+                yalign 0.5
+                spacing 25
+
+                imagebutton:
+                    idle "ui/mic_idle.png"
+                    hover "ui/mic_hover.png"
+                    action Function(_ai_listen)
+
+                text "Klik mic\nuntuk bertanya":
+                    size 26
+                    xalign 0.5
+                    text_align 0.5
+                    color "#2E7D32"
+
+                if ai_question:
+                    frame:
+                        background "#FFFFFF"
+                        padding (15, 15)
+                        text "Kamu bertanya:\n[ai_question]":
+                            size 22
+                            color "#1B5E20"
+
+            # ============================
+            # KANAN — JAWABAN AI
+            # ============================
+            vbox:
+                spacing 20
+                xfill True
+
+                frame:
+                    xfill True
+                    ysize 520
+                    background "#FFFFFF"
+                    padding (25, 25)
+
+                    viewport:
+                        draggable True
+                        mousewheel True
+
+                        text "[ai_answer]":
+                            size 28
+                            color "#1B5E20"
+                            line_spacing 10
+                            justify True
+
+                hbox:
+                    spacing 30
+                    xalign 1.0
+
+                    textbutton "Tanya Lagi":
+                        action Function(_ai_reset)
+
+                    textbutton "Selesai":
+                        action MainMenu(confirm=False)
+
+screen end_menu():
+
+    modal True
+    zorder 200
+
+    # Paksa matikan UI bawaan
+    on "show" action [
+        SetVariable("quick_menu", False),
+        Hide("quick_menu"),
+        Hide("say")
+    ]
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+        xsize 900
+        ysize 400
+        background None
+
+        vbox:
+            spacing 30
+            xalign 0.5
+            yalign 0.5
+
+            textbutton "🎤 Tanya AI tentang mitigasi bencana":
+                xsize 700
+                action Jump("ai_qna")
+
+            textbutton "❌ Akhiri permainan":
+                xsize 700
+                action Jump("ending_game")
+
