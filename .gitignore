@@ -7,4 +7,6 @@ __pycache__/
 *.save
 navigation.json
 .env
+.env.gemini
+.env.google
 saves

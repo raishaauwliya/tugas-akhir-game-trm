@@ -64,7 +64,7 @@ init python:
         script_path = os.path.join(config.basedir, "stt_worker.py")
 
         # >>> GANTI path ini jadi python.exe yang bener punyamu <<<
-        manual_python_exe = False
+        manual_python_exe = True
         if manual_python_exe:
             python_exe = r"C:\Users\m3g3n\AppData\Local\Programs\Python\Python312\python.exe"  # Ganti sesuai path Python-mu
         else:
@@ -234,10 +234,11 @@ init python:
     def run_ai_llm(question):
         import subprocess, os, json
 
-        script_path = os.path.join(config.basedir, "ai_llm_worker.py")
-        manual_python_exe = False
+        # Gunakan path absolut untuk memastikan file ditemukan
+        script_path = os.path.join(config.basedir, "ai_worker_llm.py")
+        manual_python_exe = True
         if manual_python_exe:
-            python_exe = r"C:\Users\m3g3n\AppData\Local\Programs\Python\Python312\python.exe"  # Ganti sesuai path Python-mu
+            python_exe = r"C:\Python314\python.exe"  # Ganti sesuai path Python-mu
         else:
             python_exe = r"C:\Users\raish\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe"
 
@@ -254,24 +255,37 @@ init python:
             proc = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stderr=subprocess.PIPE, # Kita tangkap error di sini
                 text=True,
+                encoding='utf-8', # Tambahkan encoding agar tidak pecah di Windows
                 startupinfo=startupinfo,
                 creationflags=creationflags,
             )
-            raw_out, _ = proc.communicate(timeout=20)
-        except Exception:
-            return "Maaf, AI sedang tidak bisa menjawab sekarang."
+            # raw_err akan memberitahu kita jika script crash sebelum print JSON
+            raw_out, raw_err = proc.communicate(timeout=20)
+            
+            # Jika raw_out kosong, cek raw_err
+            if not raw_out.strip():
+                return "Error Script: " + str(raw_err)
+
+        except Exception as e:
+            return "Gagal menjalankan proses: " + str(e)
 
         try:
-            data = json.loads(raw_out)
-            if data.get("ok"):
-                return data.get("answer")
+            json_start = raw_out.find('{')
+            if json_start != -1:
+                clean_json = raw_out[json_start:]
+                data = json.loads(clean_json)
+                if data.get("ok"):
+                    return data.get("answer")
+                else:
+                    return "AI Error: " + data.get("error", "Unknown error")
             else:
-                return "Aku belum bisa menjawab pertanyaan itu."
-        except Exception:
-            return "Terjadi kesalahan saat memproses jawaban."
-    
+                # Ini akan menampilkan apa isi raw_out sebenarnya jika bukan JSON
+                return "Bukan JSON. Isi Output: " + str(raw_out)
+        except Exception as e:
+            return "Parsing Error: " + str(e) + " | Raw: " + str(raw_out)
+
     def _ai_listen():
 
     # ===============================
@@ -1090,7 +1104,6 @@ label scene_refleksi_longsor:
     with dissolve
     stop sound fadeout 1.0
     menu:
-        "Apa yang ingin kamu lakukan?"
         "🎤 Tanya AI tentang mitigasi bencana":
             call ai_qna_session
         "❌ Akhiri permainan":
@@ -1651,6 +1664,8 @@ label scene_3_7:
     hide text
     with dissolve
     stop sound fadeout 1.0
+    
+    $ next_lock = False
     jump menu_akhir
 
 # ======================================================
@@ -1665,6 +1680,8 @@ label menu_akhir:
 
     scene bg qna
     with dissolve
+    
+    $ next_lock = False
 
     menu:
         "Apa yang ingin kamu lakukan?"
