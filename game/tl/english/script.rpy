@@ -351,3 +351,31 @@ translate english strings:
 
     old "Katakan Tindakan apa yang ingin kamu ambil?\n• Segera ambil barang berharga dan keluar dari rumah!.\n• Tunggu sebentar dan lihat apakah airnya naik."
     new "State the action you want to take?\n• Quickly take valuable items and get out of the house!.\n• Wait a bit and see if the water rises."    
+
+    old "Klik mouse untuk mulai mendengarkan."
+    new "Click the mouse to start listening."
+
+    old "Silakan ucapkan pilihanmu. Kamu bisa mengatakan:"
+    new "Please state your choice. You can say:"
+
+    old "Tidak ada kata kunci pilihan yang terdeteksi."
+    new "No choice keywords detected."
+
+    old "Maaf, saya tidak menangkap pilihanmu. Mari kita coba lagi."
+    new "Sorry, I didn’t catch your choice. Let’s try again."
+
+    old "Pilih tindakan yang ingin kamu lakukan"
+    new "Choose the action you want to take"
+
+    old "🎤 Tanya AI tentang mitigasi bencana"
+    new "🎤 Ask AI about disaster mitigation"
+
+    old "❌ Akhiri permainan"
+    new "❌ End the game"
+
+    old "STT timeout (terlalu lama)"
+    new "STT timeout (too long)"
+
+    old "STT tidak mengembalikan output"
+    new "STT did not return output"
+    

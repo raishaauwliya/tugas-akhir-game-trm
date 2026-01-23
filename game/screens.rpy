@@ -265,7 +265,7 @@ screen choice(items):
         add Solid("#FFFFFF20") xpos 8 ypos 6 xsize 0.94 ysize 2
         add Solid("#FFFFFF20") xpos 8 yalign 1.0 xsize 0.94 ysize 2
 
-        text "Katakan tindakan yang ingin kamu lakukan":
+        text "Pilih tindakan yang ingin kamu lakukan":
             size 30
             color "#FFFFFF"
             outlines [(2, "#00000080", 0, 0)]

@@ -64,7 +64,7 @@ init python:
         script_path = os.path.join(config.basedir, "stt_worker.py")
 
         # >>> GANTI path ini jadi python.exe yang bener punyamu <<<
-        manual_python_exe = True
+        manual_python_exe = False
         if manual_python_exe:
             python_exe = r"C:\Users\m3g3n\AppData\Local\Programs\Python\Python312\python.exe"  # Ganti sesuai path Python-mu
         else:
@@ -236,7 +236,7 @@ init python:
 
         # Gunakan path absolut untuk memastikan file ditemukan
         script_path = os.path.join(config.basedir, "ai_worker_llm.py")
-        manual_python_exe = True
+        manual_python_exe = False
         if manual_python_exe:
             python_exe = r"C:\Python314\python.exe"  # Ganti sesuai path Python-mu
         else:
@@ -346,7 +346,7 @@ init python:
 
     def _ai_reset():
         renpy.store.ai_question = ""
-        renpy.store.ai_answer = "Silakan ajukan pertanyaan berikutnya."
+        renpy.store.ai_answer = "Silakan ajukan pertanyaan."
 
 
     
@@ -450,6 +450,7 @@ screen choose_language_screen():
 # ====================================================================
 # ALUR CERITA UTAMA DIMULAI
 # ====================================================================
+
 
 label start:
     call choose_language
@@ -1666,7 +1667,11 @@ label scene_3_7:
     stop sound fadeout 1.0
     
     $ next_lock = False
-    jump menu_akhir
+    menu:
+        "🎤 Tanya AI tentang mitigasi bencana":
+            call ai_qna_session
+        "❌ Akhiri permainan":
+            return
 
 # ======================================================
 # AI QnA SESSION (dipanggil setelah ending cerita)
@@ -1684,7 +1689,6 @@ label menu_akhir:
     $ next_lock = False
 
     menu:
-        "Apa yang ingin kamu lakukan?"
         "🎤 Tanya AI tentang mitigasi bencana":
             jump ai_qna
 
@@ -1737,7 +1741,7 @@ screen ai_qna_screen():
         xalign 0.5
         yalign 0.5
         xsize 1600
-        ysize 850
+        ysize 900
         background "#EAF6EC"
         padding (30, 30)
 
@@ -1753,13 +1757,15 @@ screen ai_qna_screen():
                 spacing 25
 
                 imagebutton:
-                    idle "ui/mic_idle.png"
-                    hover "ui/mic_hover.png"
+                    idle "images/mic.png"
+                    hover "images/mic_hover.png"
                     action Function(_ai_listen)
+                    xalign 0.5
 
                 text "Klik mic\nuntuk bertanya":
                     size 26
                     xalign 0.5
+                    yalign 0.9
                     text_align 0.5
                     color "#2E7D32"
 
