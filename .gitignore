@@ -10,3 +10,4 @@ navigation.json
 .env.gemini
 .env.google
 saves
+service_account.json

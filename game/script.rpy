@@ -61,10 +61,10 @@ init python:
     
     def run_stt(lang_code="id-ID"):
         # Path ke stt_worker.py di root project
-        script_path = os.path.join(config.basedir, "stt_worker.py")
+        script_path = os.path.join(config.basedir, "stt_worker_v2.py")
 
         # >>> GANTI path ini jadi python.exe yang bener punyamu <<<
-        manual_python_exe = False
+        manual_python_exe = True
         if manual_python_exe:
             python_exe = r"C:\Users\m3g3n\AppData\Local\Programs\Python\Python312\python.exe"  # Ganti sesuai path Python-mu
         else:
@@ -169,7 +169,7 @@ init python:
     option_texts,
     lang_code="id-ID",
     min_overlap=1,
-    threshold=0.35,
+    threshold=0.5,
     keyword_map=None
     ):
         # 1. Dapatkan input suara
@@ -196,7 +196,8 @@ init python:
 
             # Kalau tidak ada keyword yang ketemu → gagal (kembalikan None)
             if len(hits) == 0:
-                renpy.notify("Tidak ada kata kunci pilihan yang terdeteksi.")
+                renpy.notify("Kamu mengatakan {}, tapi tidak ada yang cocok dengan pilihan.".format(spoken))
+                # renpy.notify("Tidak ada kata kunci pilihan yang terdeteksi.")
                 return None
 
         # 3. Cosine similarity terhadap semua opsi
@@ -230,13 +231,34 @@ init python:
         renpy.notify("Tidak ada kata yang cukup tumpang tindih dengan pilihan yang tersedia.")
         return None
     
+    def format_llm_text(text):
+        if not text:
+            return ""
+
+        # 1. Bold: Ubah **teks** menjadi {b}teks{/b}
+        # Regex mencari **apa saja di dalamnya**
+        text = re.sub(r'\*\*(.*?)\*\*', r'{b}\1{/b}', text)
+
+        # 2. Italic: Ubah *teks* (selain di awal baris) menjadi {i}teks{/i}
+        # Kita hindari yang di awal baris karena itu biasanya bullet point
+        text = re.sub(r' (?<!^)\*(.*?)\*', r' {i}\1{/i}', text)
+
+        # 3. Bullet Points: Ubah "- " atau "* " di awal baris menjadi "• "
+        # (?m) mengaktifkan multiline mode agar ^ mendeteksi awal baris baru
+        text = re.sub(r'(?m)^[\-\*]\s+', '• ', text)
+
+        # 4. Heading: Ubah ### Judul menjadi teks besar dan tebal
+        text = re.sub(r'(?m)^#+\s+(.*)', r'{size=+4}{b}\1{/b}{/size}', text)
+
+        return text
+    
     # AI LLM helper functions
     def run_ai_llm(question):
         import subprocess, os, json
 
         # Gunakan path absolut untuk memastikan file ditemukan
         script_path = os.path.join(config.basedir, "ai_worker_llm.py")
-        manual_python_exe = False
+        manual_python_exe = True
         if manual_python_exe:
             python_exe = r"C:\Python314\python.exe"  # Ganti sesuai path Python-mu
         else:
@@ -291,10 +313,8 @@ init python:
     # ===============================
     # Tentukan bahasa aktif
     # ===============================
-        if is_english():
-            lang_code = "en-US"
-        else:
-            lang_code = "id-ID"
+        
+        lang_code = "id-ID"
 
         # ===============================
         # Loop sampai suara valid
@@ -336,11 +356,12 @@ init python:
             # Panggil AI LLM
             # ===============================
             answer = run_ai_llm(spoken)
+            formatted_answer = format_llm_text(answer)
 
             # ===============================
             # Tampilkan jawaban
             # ===============================
-            renpy.store.ai_answer = answer
+            renpy.store.ai_answer = formatted_answer
             return
 
 
@@ -510,7 +531,7 @@ label stt_bencana:
 
         $ keyword_map = {
             0: ["landslide", "landslides"],
-            1: ["flood", "floods"],
+            1: ["flood", "floods", "flood,", "flood.", "flood?", "floods,", "floods.", "floods.", "floo", "flo", "floats", "floads", "clothes", "plus"],
         }
 
         $ stt_lang = "en-US"
@@ -537,7 +558,7 @@ label stt_bencana:
             pilihan_teks,
             lang_code=stt_lang,
             min_overlap=1,
-            threshold=0.35,
+            threshold=0.9,
             keyword_map=keyword_map
         )
 
@@ -765,7 +786,7 @@ label stt_longsor_1:
             pilihan_teks,
             lang_code=stt_lang,
             min_overlap=3,
-            threshold=0.1,
+            threshold=0.8,
             keyword_map=keyword_map
         )
 
@@ -954,7 +975,7 @@ label stt_scene_2_4_2:
             pilihan_teks,
             lang_code=stt_lang,
             min_overlap=3,
-            threshold=0.1,
+            threshold=0.8,
             keyword_map=keyword_map
         )
 
@@ -1319,7 +1340,7 @@ label stt_scene_3_4:
             pilihan_teks,
             lang_code=stt_lang,
             min_overlap=3,
-            threshold=0.1,
+            threshold=0.8,
             keyword_map=keyword_map
         )
 
@@ -1498,7 +1519,7 @@ label stt_scene_3_6:
             pilihan_teks,
             lang_code=stt_lang,
             min_overlap=3,
-            threshold=0.1,
+            threshold=0.8,
             keyword_map=keyword_map
         )
 
