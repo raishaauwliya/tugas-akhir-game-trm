@@ -379,3 +379,14 @@ translate english strings:
     old "STT tidak mengembalikan output"
     new "STT did not return output"
     
+    old "Klik mic\nuntuk bertanya"
+    new "Click mic\nto ask"
+    
+    old "Silakan ajukan pertanyaan."
+    new "Please ask your question."
+    
+    old "Tanya Lagi"
+    new "Ask Again"
+    
+    old "Selesai"
+    new "Done"

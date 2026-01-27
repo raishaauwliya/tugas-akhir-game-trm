@@ -64,9 +64,9 @@ init python:
         script_path = os.path.join(config.basedir, "stt_worker.py")
 
         # >>> GANTI path ini jadi python.exe yang bener punyamu <<<
-        manual_python_exe = False
+        manual_python_exe = True
         if manual_python_exe:
-            python_exe = r"C:\Users\m3g3n\AppData\Local\Programs\Python\Python312\python.exe"  # Ganti sesuai path Python-mu
+            python_exe = r"C:\Python-Raisha\python.exe"  # Ganti sesuai path Python-mu
         else:
             python_exe = r"C:\Users\raish\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe"
 
@@ -258,12 +258,17 @@ init python:
 
         # Gunakan path absolut untuk memastikan file ditemukan
         script_path = os.path.join(config.basedir, "ai_worker_llm.py")
-        manual_python_exe = False
+        manual_python_exe = True
         if manual_python_exe:
-            python_exe = r"C:\Python314\python.exe"  # Ganti sesuai path Python-mu
+            python_exe = r"C:\Python-Raisha\python.exe"  # Ganti sesuai path Python-mu
         else:
             python_exe = r"C:\Users\raish\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe"
 
+        if is_english():
+            question = "Note: please answer this question in english. " + question
+        else:
+            question = "Keterangan: tolong jawab pertanyaan dengan bahasa Indonesia. " + question
+            
         startupinfo = None
         creationflags = 0
         if renpy.windows:
@@ -313,9 +318,10 @@ init python:
     # ===============================
     # Tentukan bahasa aktif
     # ===============================
-
-        lang_code = "id-ID"
-
+        if is_english():
+            lang_code = "en-US"
+        else:
+            lang_code = "id-ID"
         # ===============================
         # Loop sampai suara valid
         # ===============================
@@ -367,7 +373,10 @@ init python:
 
     def _ai_reset():
         renpy.store.ai_question = ""
-        renpy.store.ai_answer = "Silakan ajukan pertanyaan."
+        if is_english():
+            renpy.store.ai_answer = "Please ask a question."
+        else:
+            renpy.store.ai_answer = "Silakan ajukan pertanyaan."
 
 
 

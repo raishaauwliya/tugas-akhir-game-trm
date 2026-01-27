@@ -1,7 +1,7 @@
 import sys
 import json
 import os
-from google import genai # Note the change here
+from google import genai 
 from dotenv import load_dotenv
 import logging
 
@@ -33,18 +33,21 @@ def main():
     try:
         # New syntax for generating content
         response = client.models.generate_content(
-            model="gemini-2.0-flash", # Use a valid model name
+            model="gemini-2.0-flash", 
             contents=question,
             config={
+                # --- UPDATED INSTRUCTION FOR BILINGUAL SUPPORT ---
                 "system_instruction": (
-                    "Kamu adalah asisten edukasi untuk anak-anak di Indonesia. "
-                    "Topik yang boleh dibahas HANYA seputar bencana alam, "
-                    "keselamatan diri, dan mitigasi bencana. "
-                    "Gunakan bahasa Indonesia yang sederhana, singkat, "
-                    "dan tidak menakutkan."
+                    "You are an educational assistant for children. "
+                    "Topics allowed: natural disasters, safety, and mitigation only. "
+                    "IMPORTANT: You must adapt to the language of the user's prompt. "
+                    "1. If the prompt is in English, answer in simple, short English. "
+                    "2. If the prompt is in Indonesian, answer in simple, short Indonesian. "
+                    "Do not be scary. Keep explanations concise and friendly."
                 ),
+                # -------------------------------------------------
                 "temperature": 0.4,
-                "max_output_tokens": 1000,
+                "max_output_tokens": 2000,
             }
         )
 
