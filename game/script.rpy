@@ -3,7 +3,7 @@
 init python:
     import os, json, subprocess, string, math, re
     from collections import Counter
-    
+
     # ====================================================================
     # 1) Fungsi On/Off Audio
     # ====================================================================
@@ -41,7 +41,7 @@ init python:
     # -----------------------------
     # 1) Fungsi Speech-to-Text (STT)
     # -----------------------------
-    
+
     # --- STT Helper Functions ---
     def parse_stt_output(raw_out):
         renpy.log("Raw STT: {}".format(raw_out))
@@ -58,13 +58,13 @@ init python:
 
         text = data.get("text") or ""
         return text.strip()
-    
+
     def run_stt(lang_code="id-ID"):
         # Path ke stt_worker.py di root project
-        script_path = os.path.join(config.basedir, "stt_worker_v2.py")
+        script_path = os.path.join(config.basedir, "stt_worker.py")
 
         # >>> GANTI path ini jadi python.exe yang bener punyamu <<<
-        manual_python_exe = True
+        manual_python_exe = False
         if manual_python_exe:
             python_exe = r"C:\Users\m3g3n\AppData\Local\Programs\Python\Python312\python.exe"  # Ganti sesuai path Python-mu
         else:
@@ -148,7 +148,7 @@ init python:
         # Rumus Cosine Similarity:
         # dot product / (norm_a * norm_b)
         return dot / (norm_a * norm_b)
-    
+
     def format_spoken(value):
         """Mengubah input dari STT menjadi string yang aman untuk renpy.notify."""
         if value is None:
@@ -230,7 +230,7 @@ init python:
         # Tidak ada yang lolos min_overlap
         renpy.notify("Tidak ada kata yang cukup tumpang tindih dengan pilihan yang tersedia.")
         return None
-    
+
     def format_llm_text(text):
         if not text:
             return ""
@@ -251,14 +251,14 @@ init python:
         text = re.sub(r'(?m)^#+\s+(.*)', r'{size=+4}{b}\1{/b}{/size}', text)
 
         return text
-    
+
     # AI LLM helper functions
     def run_ai_llm(question):
         import subprocess, os, json
 
         # Gunakan path absolut untuk memastikan file ditemukan
         script_path = os.path.join(config.basedir, "ai_worker_llm.py")
-        manual_python_exe = True
+        manual_python_exe = False
         if manual_python_exe:
             python_exe = r"C:\Python314\python.exe"  # Ganti sesuai path Python-mu
         else:
@@ -285,7 +285,7 @@ init python:
             )
             # raw_err akan memberitahu kita jika script crash sebelum print JSON
             raw_out, raw_err = proc.communicate(timeout=20)
-            
+
             # Jika raw_out kosong, cek raw_err
             if not raw_out.strip():
                 return "Error Script: " + str(raw_err)
@@ -313,7 +313,7 @@ init python:
     # ===============================
     # Tentukan bahasa aktif
     # ===============================
-        
+
         lang_code = "id-ID"
 
         # ===============================
@@ -370,7 +370,7 @@ init python:
         renpy.store.ai_answer = "Silakan ajukan pertanyaan."
 
 
-    
+
 
 # ====================================================================
 # DEFINISI KARAKTER DAN POSISI
@@ -423,8 +423,8 @@ screen stt_listening_menu(options):
             null height 20
 
             text "Mendengarkan..." italic True
-    
-    
+
+
 
 # ====================================================================
 # SCREEN & LABEL: PILIH BAHASA
@@ -467,7 +467,7 @@ screen choose_language_screen():
 
         textbutton _("English"):
             action [ SetVariable("language_queued", "english"), Return() ]
-            
+
 # ====================================================================
 # ALUR CERITA UTAMA DIMULAI
 # ====================================================================
@@ -475,7 +475,7 @@ screen choose_language_screen():
 
 label start:
     call choose_language
-    
+
     # Atur volume BGM dan loop (BGM TIDAK dimatikan oleh tombol voice toggle)
     $ renpy.music.set_volume(0.4, delay=0, channel='music')
     play music "audio/sound.mp3" fadein 1.0 loop
@@ -500,24 +500,24 @@ label start:
     show pak karto senyum at left_position
     $ play_dialogue("Pak Karto 1.mp3")
     pak_karto "Wah, saya senang melihat semangat dan antusias kalian! Nah, kalian mau mulai belajar dari yang mana dulu? Longsor atau banjir?"
-    hide pak karto 
+    hide pak karto
     with dissolve
     stop sound fadeout 1.0
-    
+
     jump pilih_bencana
 
 # ====================================================================
 # PILIHAN BENCANA (LONGOSOR / BANJIR)
 # ====================================================================
 
-label pilih_bencana:  
+label pilih_bencana:
     show pak karto senyum at left_position
     $ renpy.notify("Silakan ucapkan pilihanmu. Kamu bisa mengatakan:")
     $ renpy.pause(1.0)
     $ renpy.notify("Klik mouse untuk mulai mendengarkan.")
     pak_karto "Katakan topik apa yang ingin kamu pelajari:\n• Belajar tentang Longsor\n• Belajar tentang Banjir"
     jump stt_bencana
-    
+
 label stt_bencana:
 
     # ===============================
@@ -531,7 +531,7 @@ label stt_bencana:
 
         $ keyword_map = {
             0: ["landslide", "landslides"],
-            1: ["flood", "floods", "flood,", "flood.", "flood?", "floods,", "floods.", "floods.", "floo", "flo", "floats", "floads", "clothes", "plus"],
+            1: ["flood", "floods", "flood,", "flood.", "flood?", "floods,", "floods.", "floods.", "floo", "flo", "floats", "floads", "clothes", "plus", "looks", "float", "fruits"],
         }
 
         $ stt_lang = "en-US"
@@ -591,14 +591,14 @@ label scene_longsor:
         "Pada liburan sekolah yang cerah, Rara gadis kecil usia 11 tahun tiba di Desa Lereng Damai bersama keluarganya. Desa ini berada di kaki gunung yang megah, dikelilingi pepohonan hijau dan udara yang sejuk. Rara bersemangat memulai petualangan di tempat liburannya, tapi ia juga merasa sedikit cemas.",
         size=36,
         color="#179940",
-        slow=True,     
-        slow_cps=13,    
-        xalign=0.5,     
-        yalign=-0.1,     
-        text_align=0.5,   
-        justify=True,    
-        xmaximum=900,    
-        line_spacing=10,  
+        slow=True,
+        slow_cps=13,
+        xalign=0.5,
+        yalign=-0.1,
+        text_align=0.5,
+        justify=True,
+        xmaximum=900,
+        line_spacing=10,
         layout="subtitle"
     )
 
@@ -638,7 +638,7 @@ label scene_longsor:
     hide niko
     with dissolve
     stop sound fadeout 1.0
-    
+
     scene bg d
     with dissolve
 
@@ -679,7 +679,7 @@ label scene_longsor:
     with dissolve
     stop sound fadeout 1.0
 
-    show bu sari info at left_position 
+    show bu sari info at left_position
     $ play_dialogue("Bu Sari 2.mp3")
     bu_sari "Tepat sekali, Niko! Selain hujan, lereng yang curam juga membuat longsor lebih mudah terjadi karena gaya pendorongnya lebih besar daripada gaya penahannya."
 
@@ -739,7 +739,7 @@ label scene_longsor:
 
     hide rara
     with dissolve
-    
+
     jump pilih_longsor_1
 
 label pilih_longsor_1:
@@ -750,7 +750,7 @@ label pilih_longsor_1:
     niko "Katakan Tindakan apa yang ingin kamu ambil?\n• Ayo langsung laporkan ke Pak Ardi!\n• Tunggu dulu, ini cuma retakan kecil."
 
     jump stt_longsor_1
-    
+
 label stt_longsor_1:
     # --- VOICE MENU: Report vs Wait ---
 
@@ -869,7 +869,7 @@ label scene_evacuation:
 
     show bu sari ngajar at left_position
     $ play_dialogue("Bu Sari 4.mp3")
-    
+
     bu_sari "Anak-anak, jalur evakuasi adalah rute menuju tempat aman saat bencana. Titik kumpul kita ada di lapangan sekolah yang aman dari longsor. Penting untuk tahu jalur ini supaya bisa bergerak cepat dan aman."
     $ play_dialogue("Bu Sari 5.mp3")
     bu_sari "Kalau terdengar alarm atau sirine, langkah pertama adalah tetap tenang. Ikuti rambu evakuasi yang ada."
@@ -931,7 +931,7 @@ label scene_evacuation:
 
     jump pilih_scene_2_4_2
 
-label pilih_scene_2_4_2:  
+label pilih_scene_2_4_2:
     show niko info at left_position
     $ renpy.notify("Silakan ucapkan pilihanmu. Kamu bisa mengatakan:")
     $ renpy.pause(1.0)
@@ -939,7 +939,7 @@ label pilih_scene_2_4_2:
     niko "Tindakan apa yang ingin kamu ambil?\n• Tetap tenang dan ikuti jalur evakuasi.\n• Panik dan lari sembarangan"
 
     jump stt_scene_2_4_2
-    
+
 label stt_scene_2_4_2:
     # --- VOICE MENU: Calm vs Panic ---
 
@@ -992,7 +992,7 @@ label stt_scene_2_4_2:
             niko "Aku belum menangkap pilihanmu. Yuk, kita coba lagi."
 
         jump pilih_scene_2_4_2
-        
+
 label scene_2_6_1:
 
     scene bg k
@@ -1108,14 +1108,14 @@ label scene_refleksi_longsor:
         "Setelah melalui berbagai pengalaman dan pembelajaran tentang tanah longsor, Rara, Niko dan warga sekitar di Desa Lereng Damai menyadari betapa pentingnya kesadaran akan bencana ini. Mereka belajar bahwa tanah longsor adalah pergerakan massa tanah yang dapat terjadi akibat curah hujan tinggi, gempa bumi, atau kondisi lereng yang tidak stabil. Melalui simulasi evakuasi dan kegiatan menanam pohon, mereka memahami bahwa tindakan pencegahan seperti menjaga lingkungan dan mengikuti prosedur evakuasi sangatlah penting untuk keselamatan diri dan orang lain.",
         size=36,
         color="#179940",
-        slow=True,     
-        slow_cps=13,    
-        xalign=0.5,     
-        yalign=-0.05,     
-        text_align=0.5,   
-        justify=True,    
-        xmaximum=900,    
-        line_spacing=10,  
+        slow=True,
+        slow_cps=13,
+        xalign=0.5,
+        yalign=-0.05,
+        text_align=0.5,
+        justify=True,
+        xmaximum=900,
+        line_spacing=10,
         layout="subtitle"
     )
 
@@ -1143,14 +1143,14 @@ label scene_banjir:
         "Pada suatu hari yang cerah di bulan November, Rara, seorang gadis kecil berusia 11 tahun, tiba di Desa Lereng Damai bersama keluarganya. Desa ini dikelilingi oleh sungai yang mengalir tenang dan sawah hijau yang luas. Rara sangat bersemangat memulai petualangan di tempat liburannya. Namun, ia mendengar dari warga bahwa desa ini sering terkena banjir saat musim hujan tiba.",
         size=36,
         color="#179940",
-        slow=True,     
-        slow_cps=13,    
-        xalign=0.5,     
-        yalign=-0.1,     
-        text_align=0.5,   
-        justify=True,    
-        xmaximum=900,    
-        line_spacing=10,  
+        slow=True,
+        slow_cps=13,
+        xalign=0.5,
+        yalign=-0.1,
+        text_align=0.5,
+        justify=True,
+        xmaximum=900,
+        line_spacing=10,
         layout="subtitle"
     )
 
@@ -1296,7 +1296,7 @@ label scene_3_4:
     stop sound fadeout 1.0
     jump pilih_scene_3_4
 
-label pilih_scene_3_4:  
+label pilih_scene_3_4:
     show rara bingung at left_position
     $ renpy.notify("Silakan ucapkan pilihanmu. Kamu bisa mengatakan:")
     $ renpy.pause(1.0)
@@ -1304,7 +1304,7 @@ label pilih_scene_3_4:
     rara "Katakan Tindakan apa yang ingin kamu ambil?\n• Ayo langsung laporkan ke Pak Ardi!.\n• Tunggu dulu, sepertinya tidak akan sampai naik terlalu tinggi."
 
     jump stt_scene_3_4
-    
+
 label stt_scene_3_4:
         # --- VOICE MENU: Report vs Wait ---
 
@@ -1475,7 +1475,7 @@ label scene_3_6:
     stop sound fadeout 1.0
     jump pilih_scene_3_6
 
-label pilih_scene_3_6:  
+label pilih_scene_3_6:
     show niko info at left_position
     $ renpy.notify("Silakan ucapkan pilihanmu. Kamu bisa mengatakan:")
     $ renpy.pause(1.0)
@@ -1483,7 +1483,7 @@ label pilih_scene_3_6:
     niko "Katakan Tindakan apa yang ingin kamu ambil?\n• Segera ambil barang berharga dan keluar dari rumah!.\n• Tunggu sebentar dan lihat apakah airnya naik."
 
     jump stt_scene_3_6
-    
+
 label stt_scene_3_6:
         # --- VOICE MENU: Act Fast vs Wait ---
 
@@ -1669,14 +1669,14 @@ label scene_3_7:
         "Melalui pengalaman ini, Rara, Niko, dan warga Desa Lereng Damai belajar bahwa menjaga lingkungan adalah kunci mencegah banjir. Menanam pohon, membersihkan saluran air, dan mengenali tanda bahaya adalah langkah penting untuk melindungi diri dan masyarakat. Dengan kerja sama seluruh warga, desa mereka bisa lebih aman dari banjir di masa depan.",
         size=36,
         color="#179940",
-        slow=True,     
-        slow_cps=30,    
-        xalign=0.5,     
-        yalign=-0.1,     
-        text_align=0.5,   
-        justify=True,    
-        xmaximum=900,    
-        line_spacing=10,  
+        slow=True,
+        slow_cps=30,
+        xalign=0.5,
+        yalign=-0.1,
+        text_align=0.5,
+        justify=True,
+        xmaximum=900,
+        line_spacing=10,
         layout="subtitle"
     )
 
@@ -1686,7 +1686,7 @@ label scene_3_7:
     hide text
     with dissolve
     stop sound fadeout 1.0
-    
+
     $ next_lock = False
     menu:
         "🎤 Tanya AI tentang mitigasi bencana":
@@ -1706,7 +1706,7 @@ label menu_akhir:
 
     scene bg qna
     with dissolve
-    
+
     $ next_lock = False
 
     menu:
@@ -1862,4 +1862,3 @@ screen end_menu():
             textbutton "❌ Akhiri permainan":
                 xsize 700
                 action Jump("ending_game")
-
